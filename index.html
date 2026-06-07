@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Project Re:birth — Final</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --black:#0A0A0A; --dark:#111; --card:#181818;
+  --border:rgba(255,255,255,0.08); --border2:rgba(255,255,255,0.13);
+  --green:#00D97E; --green2:#00A85A; --green-bg:rgba(0,217,126,0.08);
+  --white:#F5F5F0; --grey:#888; --grey2:#555; --orange:#FF6B35;
+  --radius:14px; --radius-s:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--black);color:var(--white);font-family:'Noto Sans KR',sans-serif;min-height:100vh;padding-bottom:60px;}
+
+/* ── 히어로 ── */
+.hero{padding:36px 20px 28px;max-width:720px;margin:0 auto;}
+.hero-eye{font-size:10px;letter-spacing:4px;color:var(--green);font-weight:700;text-transform:uppercase;margin-bottom:8px;}
+.hero-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(48px,10vw,80px);line-height:.9;letter-spacing:2px;margin-bottom:18px;}
+.hero-title span{color:var(--green);}
+.hero-meta{display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.dday-badge{background:var(--green);color:#000;font-size:13px;font-weight:800;padding:8px 16px;border-radius:30px;}
+.dday-badge span{font-size:20px;font-weight:900;}
+.hero-sub{font-size:12px;color:var(--grey);}
+
+/* ── 공통 ── */
+.wrap{max-width:720px;margin:0 auto;padding:0 20px;}
+.section{margin-bottom:26px;}
+.sec-label{font-size:10px;letter-spacing:3px;font-weight:700;color:var(--green);text-transform:uppercase;margin-bottom:12px;}
+
+/* ── 체중 추세 차트 ── */
+.trend-wrap{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:12px;}
+.trend-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.trend-title{font-size:11px;font-weight:700;color:var(--grey);letter-spacing:1px;}
+.trend-legend{display:flex;gap:12px;}
+.tleg{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--grey);}
+.tleg-dot{width:8px;height:2px;border-radius:1px;}
+.trend-canvas{width:100%;display:block;}
+
+/* ── 스탯 스트립 ── */
+.stats-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-s);padding:14px 12px;text-align:center;}
+.stat-num{font-size:22px;font-weight:800;color:var(--green);line-height:1;}
+.stat-lbl{font-size:10px;color:var(--grey);margin-top:4px;}
+
+/* ── 진행률 ── */
+.prog-wrap{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;}
+.prog-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.prog-label{font-size:13px;font-weight:600;}
+.prog-pct{font-size:20px;font-weight:900;color:var(--green);}
+.prog-bar-bg{height:5px;background:rgba(255,255,255,0.07);border-radius:3px;overflow:hidden;}
+.prog-bar-fill{height:100%;background:linear-gradient(90deg,var(--green2),var(--green));border-radius:3px;transition:width 1s ease;}
+.prog-subs{display:flex;justify-content:space-between;margin-top:7px;}
+.prog-sub{font-size:11px;color:var(--grey);}
+
+/* ── 오늘의 루틴 2×2 ── */
+.today-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.today-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px 14px;min-height:100px;}
+.tc-time{font-size:10px;letter-spacing:1.5px;color:var(--grey);font-weight:600;margin-bottom:8px;}
+.tc-name{font-size:13px;font-weight:700;color:var(--white);line-height:1.45;}
+.tc-sub{font-size:11px;color:var(--grey);margin-top:6px;line-height:1.5;}
+.tc-green{border-color:rgba(0,217,126,0.2);background:linear-gradient(135deg,var(--green-bg),var(--card));}
+
+/* ── 물 트래커 ── */
+.water-wrap{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;}
+.water-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+.water-title{font-size:13px;font-weight:700;}
+.water-count{font-size:12px;color:var(--green);font-weight:700;}
+.water-btns{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;}
+.water-btn{aspect-ratio:1;border-radius:50%;border:2px solid var(--grey2);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all .15s;color:var(--grey2);}
+.water-btn.done{border-color:var(--green);background:rgba(0,217,126,0.15);color:var(--green);}
+.water-sub{font-size:10px;color:var(--grey);margin-top:8px;text-align:center;}
+
+/* ── 체크리스트 ── */
+.checklist{display:flex;flex-direction:column;gap:6px;margin-top:10px;}
+.check-item{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-s);padding:12px 14px;cursor:pointer;transition:all .15s;}
+.check-item.done{border-color:rgba(0,217,126,0.2);background:var(--green-bg);}
+.chk-box{width:20px;height:20px;border-radius:5px;border:2px solid var(--grey2);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;transition:all .15s;color:transparent;}
+.check-item.done .chk-box{background:var(--green);border-color:var(--green);color:#000;}
+.chk-text{font-size:13px;font-weight:500;flex:1;}
+.check-item.done .chk-text{color:var(--grey);text-decoration:line-through;}
+.chk-badge{font-size:10px;color:var(--grey);background:rgba(255,255,255,0.05);padding:2px 7px;border-radius:5px;}
+
+/* ── 데일리 로그 ── */
+.log-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;}
+.log-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-bottom:10px;}
+.log-field{display:flex;flex-direction:column;gap:5px;}
+.log-lbl{font-size:10px;color:var(--grey);font-weight:600;letter-spacing:.5px;}
+.log-inp{background:rgba(255,255,255,0.05);border:1px solid var(--border2);border-radius:7px;color:var(--white);font-size:14px;font-weight:700;padding:9px 10px;width:100%;outline:none;font-family:inherit;-moz-appearance:textfield;}
+.log-inp::placeholder{color:var(--grey2);font-weight:400;}
+.log-inp:focus{border-color:var(--green);}
+input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
+.log-note{width:100%;background:rgba(255,255,255,0.05);border:1px solid var(--border2);border-radius:7px;color:var(--white);font-size:13px;padding:9px 10px;resize:none;outline:none;font-family:inherit;min-height:60px;margin-bottom:10px;}
+.log-note:focus{border-color:var(--green);}
+.log-note::placeholder{color:var(--grey2);}
+.log-save-btn{width:100%;padding:11px;background:var(--green);color:#000;border:none;border-radius:9px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;}
+.log-save-btn:hover{background:var(--green2);color:var(--white);}
+.log-saved{font-size:11px;color:var(--green);text-align:center;margin-top:6px;min-height:16px;}
+
+/* ── 주간 캘린더 ── */
+.week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;}
+.week-day{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-s);padding:9px 5px;text-align:center;}
+.week-day.today{border-color:var(--green);background:var(--green-bg);}
+.week-day.rest{opacity:.45;}
+.w-name{font-size:10px;font-weight:700;color:var(--grey);margin-bottom:5px;}
+.week-day.today .w-name{color:var(--green);}
+.w-icon{font-size:13px;margin-bottom:3px;}
+.w-detail{font-size:9px;color:var(--grey);line-height:1.4;}
+
+/* ── 닭가슴살 로테이션 ── */
+.rot-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;}
+.rot-item{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-s);padding:10px 7px;text-align:center;}
+.rot-item.today-rot{border-color:var(--green);background:var(--green-bg);}
+.rot-dow{font-size:10px;font-weight:700;color:var(--grey);margin-bottom:5px;}
+.rot-item.today-rot .rot-dow{color:var(--green);}
+.rot-name{font-size:9px;font-weight:600;color:var(--white);line-height:1.5;}
+.rot-div{height:1px;background:var(--border);margin:4px 0;}
+
+/* ── 영상 ── */
+.video-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+.video-btn{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-s);padding:14px;text-align:center;text-decoration:none;display:block;transition:all .15s;}
+.video-btn:hover{border-color:rgba(0,217,126,0.35);}
+.v-icon{font-size:20px;margin-bottom:5px;}
+.v-name{font-size:12px;font-weight:600;color:var(--white);}
+
+/* ── 리셋 ── */
+.reset-btn{background:none;border:1px solid var(--border);border-radius:7px;color:var(--grey);font-size:11px;padding:5px 12px;cursor:pointer;margin-top:10px;font-family:inherit;}
+.reset-btn:hover{border-color:var(--border2);color:var(--white);}
+
+@media(max-width:540px){
+  .today-grid{grid-template-columns:1fr;}
+  .rot-grid{grid-template-columns:repeat(3,1fr);}
+  .video-grid{grid-template-columns:1fr 1fr;}
+  .log-grid{grid-template-columns:1fr 1fr;}
+  .stats-strip{gap:6px;}
+  .stat-num{font-size:18px;}
+  .water-btns{gap:4px;}
+}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-eye">PROJECT RE:BIRTH — FINAL PHASE</div>
+  <div class="hero-title">2 MONTH<br><span>CHALLENGE</span></div>
+  <div class="hero-meta">
+    <div class="dday-badge">D-<span id="dday-num">—</span></div>
+    <div class="hero-sub" id="hero-date">—</div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- 체중 추세 차트 -->
+  <div class="trend-wrap">
+    <div class="trend-header">
+      <div class="trend-title">체중 추세</div>
+      <div class="trend-legend">
+        <div class="tleg"><div class="tleg-dot" style="background:#555;height:1px;width:10px;"></div>실제 체중</div>
+        <div class="tleg"><div class="tleg-dot" style="background:#00D97E;height:2px;width:10px;"></div>3일 평균</div>
+      </div>
+    </div>
+    <canvas class="trend-canvas" id="trend-chart" height="70"></canvas>
+    <div style="font-size:10px;color:var(--grey);margin-top:6px;text-align:right;" id="trend-meta"></div>
+  </div>
+
+  <!-- 스탯 스트립 -->
+  <div class="section">
+    <div class="stats-strip">
+      <div class="stat-card">
+        <div class="stat-num" id="stat-weight">—</div>
+        <div class="stat-lbl">오늘 체중 (kg)</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="stat-bmi">—</div>
+        <div class="stat-lbl">BMI</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="stat-weekly-km">—</div>
+        <div class="stat-lbl">이번 주 러닝 (km)</div>
+      </div>
+    </div>
+
+    <!-- 진행률 -->
+    <div class="prog-wrap">
+      <div class="prog-top">
+        <div class="prog-label" id="prog-label">프로젝트 경과</div>
+        <div class="prog-pct" id="prog-pct">—</div>
+      </div>
+      <div class="prog-bar-bg"><div class="prog-bar-fill" id="prog-bar" style="width:0%"></div></div>
+      <div class="prog-subs">
+        <div class="prog-sub">시작 · 6/9</div>
+        <div class="prog-sub">목표 · 7/31</div>
+      </div>
+    </div>
+  </div>
+
+
+
+  <!-- 데일리 로그 -->
+  <div class="section">
+    <div class="sec-label">오늘의 기록</div>
+    <div class="log-card">
+      <div class="log-grid">
+        <div class="log-field">
+          <div class="log-lbl">체중 (kg)</div>
+          <input class="log-inp" type="number" step="0.1" id="log-weight" placeholder="80.0">
+        </div>
+        <div class="log-field">
+          <div class="log-lbl">러닝 거리 (km)</div>
+          <input class="log-inp" type="number" step="0.01" id="log-km" placeholder="5.0">
+        </div>
+        <div class="log-field">
+          <div class="log-lbl">시간 (분)</div>
+          <input class="log-inp" type="number" step="1" id="log-min" placeholder="30">
+        </div>
+        <div class="log-field">
+          <div class="log-lbl">칼로리 소모</div>
+          <input class="log-inp" type="number" step="1" id="log-kcal" placeholder="350">
+        </div>
+      </div>
+      <textarea class="log-note" id="log-note" placeholder="특이사항 · 컨디션 · 메모"></textarea>
+      <button class="log-save-btn" onclick="saveLog()">저장하기</button>
+      <div class="log-saved" id="log-saved"></div>
+    </div>
+  </div>
+
+  <!-- 오늘의 루틴 (2×2) -->
+  <div class="section">
+    <div class="sec-label">오늘의 루틴</div>
+    <div class="today-grid">
+      <div class="today-card tc-green">
+        <div class="tc-time">🌅 아침 운동</div>
+        <div class="tc-name" id="tw-morning">—</div>
+      </div>
+      <div class="today-card tc-green">
+        <div class="tc-time">🌙 저녁 운동</div>
+        <div class="tc-name" id="tw-evening">—</div>
+      </div>
+      <div class="today-card">
+        <div class="tc-time">☀️ 점심</div>
+        <div class="tc-name" id="today-lunch">—</div>
+        <div class="tc-sub">찐고구마 200g · 양배추 150g<br>느타리버섯 150g · 두부 150g</div>
+      </div>
+      <div class="today-card">
+        <div class="tc-time">🌙 저녁</div>
+        <div class="tc-name">한입 닭가슴살 1팩</div>
+        <div class="tc-sub">오트밀 55g + 계란 2개<br>올리브오일 5cc</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 물 트래커 -->
+  <div class="section">
+    <div class="sec-label">Daily Checklist</div>
+    <div class="water-wrap">
+      <div class="water-top">
+        <div class="water-title">💧 물 4L</div>
+        <div class="water-count" id="water-count">0 / 8</div>
+      </div>
+      <div class="water-btns" id="water-btns"></div>
+      <div class="water-sub" id="water-sub">0 ml / 4,000 ml</div>
+    </div>
+    <div class="checklist" id="checklist"></div>
+    <button class="reset-btn" onclick="resetAll()">↺ 오늘 초기화</button>
+  </div>
+
+
+  <!-- 주간 운동 캘린더 -->
+  <div class="section">
+    <div class="sec-label">이번 주 운동 일정</div>
+    <div class="week-grid" id="week-grid"></div>
+  </div>
+
+  <!-- 닭가슴살 로테이션 -->
+  <div class="section">
+    <div class="sec-label">이번 주 점심 닭가슴살 로테이션</div>
+    <div class="rot-grid" id="lunch-rot"></div>
+  </div>
+
+  <!-- 영상 링크 -->
+  <div class="section">
+    <div class="sec-label">홈트 영상</div>
+    <div class="video-grid">
+      <a class="video-btn" href="https://youtu.be/qXlRTpW_AZA?si=IamT5PWRF65V93Oc" target="_blank">
+        <div class="v-icon">💪</div><div class="v-name">상체 덤벨</div>
+      </a>
+      <a class="video-btn" href="https://youtu.be/AQ7778lCNZY?si=uEmZONG3zwoAaAnM" target="_blank">
+        <div class="v-icon">🦵</div><div class="v-name">하체 덤벨</div>
+      </a>
+      <a class="video-btn" href="https://youtu.be/atSejLAeZ9Y?si=oCDWr1W8YiVNxt55" target="_blank">
+        <div class="v-icon">🔥</div><div class="v-name">복근 홈트</div>
+      </a>
+    </div>
+  </div>
+
+</div>
+
+
+</div>
+
+<script>
+
+// ── 체중 추세 차트 ──────────────────────────────────────────
+function renderTrendChart() {
+  var canvas = document.getElementById('trend-chart');
+  if (!canvas) return;
+
+  // 최근 30일 데이터 수집
+  var points = [];
+  var now = new Date(); now.setHours(0,0,0,0);
+  for (var i = 29; i >= 0; i--) {
+    var d = new Date(now); d.setDate(now.getDate() - i);
+    var key = 'log_' + d.getFullYear() + '-' + (d.getMonth()+1) + '-' + d.getDate();
+    var log = lsGet(key);
+    if (log && log.weight) {
+      points.push({ day: 29 - i, w: parseFloat(log.weight), date: (d.getMonth()+1)+'/'+ d.getDate() });
+    }
+  }
+  if (points.length < 2) {
+    document.getElementById('trend-meta').textContent = '기록이 2일 이상 쌓이면 차트가 표시돼요';
+    return;
+  }
+
+  // 3일 이동평균
+  var avgs = points.map(function(p, i) {
+    var slice = points.slice(Math.max(0, i-2), i+1);
+    var avg   = slice.reduce(function(s,x){return s+x.w;},0) / slice.length;
+    return { day: p.day, w: +avg.toFixed(2) };
+  });
+
+  // 스케일
+  var allW   = points.map(function(p){return p.w;});
+  var minW   = Math.min.apply(null, allW);
+  var maxW   = Math.max.apply(null, allW);
+  var pad    = Math.max(0.5, (maxW - minW) * 0.2);
+  var yMin   = minW - pad;
+  var yMax   = maxW + pad;
+
+  // 캔버스 설정
+  var dpr    = window.devicePixelRatio || 1;
+  var W      = canvas.offsetWidth;
+  var H      = 70;
+  canvas.width  = W * dpr;
+  canvas.height = H * dpr;
+  canvas.style.height = H + 'px';
+  var ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  var px = function(d){ return (d / 29) * (W - 20) + 10; };
+  var py = function(w){ return H - 8 - ((w - yMin) / (yMax - yMin)) * (H - 16); };
+
+  // 배경 그리드 (가로선 2개)
+  ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+  ctx.lineWidth   = 1;
+  [0.33, 0.66].forEach(function(r){
+    var y = 8 + r * (H - 16);
+    ctx.beginPath(); ctx.moveTo(10, y); ctx.lineTo(W-10, y); ctx.stroke();
+  });
+
+  // 실제 체중 선
+  ctx.beginPath();
+  ctx.strokeStyle = 'rgba(200,200,200,0.4)';
+  ctx.lineWidth   = 1;
+  points.forEach(function(p, i){
+    if (i === 0) ctx.moveTo(px(p.day), py(p.w));
+    else         ctx.lineTo(px(p.day), py(p.w));
+  });
+  ctx.stroke();
+
+  // 실제 체중 점
+  points.forEach(function(p){
+    ctx.beginPath();
+    ctx.arc(px(p.day), py(p.w), 2.5, 0, Math.PI*2);
+    ctx.fillStyle = 'rgba(200,200,200,0.7)';
+    ctx.fill();
+  });
+
+  // 3일 평균선
+  ctx.beginPath();
+  ctx.strokeStyle = '#00D97E';
+  ctx.lineWidth   = 2;
+  ctx.lineJoin    = 'round';
+  avgs.forEach(function(p, i){
+    if (i === 0) ctx.moveTo(px(p.day), py(p.w));
+    else         ctx.lineTo(px(p.day), py(p.w));
+  });
+  ctx.stroke();
+
+  // 최신 값 레이블
+  var last = points[points.length-1];
+  ctx.fillStyle = '#00D97E';
+  ctx.font = 'bold 10px sans-serif';
+  ctx.textAlign = 'right';
+  ctx.fillText(last.w.toFixed(1)+'kg', W-6, py(last.w)-5);
+
+  // 메타 정보
+  var first = points[0];
+  var diff  = (last.w - first.w).toFixed(1);
+  var sign  = diff > 0 ? '+' : '';
+  document.getElementById('trend-meta').textContent =
+    points[0].date + ' ~ ' + last.date + ' (' + points.length + '일 기록) · 기간 변화 ' + sign + diff + 'kg';
+}
+
+// ── 상수 ──────────────────────────────────────────────────────
+var HEIGHT_M  = 1.79;
+var START     = new Date(2026,5,9);
+var TARGET    = new Date(2026,6,31);
+var TOTAL     = Math.round((TARGET - START) / 86400000);
+var DOW_KR    = ['일','월','화','수','목','금','토'];
+
+// ── 운동 스케줄 ───────────────────────────────────────────────
+var WORKOUTS = {
+  0:{ morning:'LSD 8km (8분대)', evening:'5km 러닝 + 복근', rest:false },
+  1:{ morning:'휴식',            evening:'산책 30분', rest:true },
+  2:{ morning:'5km 러닝 (6:20)', evening:'상체 덤벨 + 복근', rest:false },
+  3:{ morning:'3km 러닝 (5:40)', evening:'5km 러닝 + 복근', rest:false },
+  4:{ morning:'5km 러닝 (6:20)', evening:'하체 덤벨 + 복근', rest:false },
+  5:{ morning:'3km 러닝 (5:40)', evening:'5km 러닝 + 복근', rest:false },
+  6:{ morning:'인터벌 (700m×4:30)', evening:'상체 덤벨 + 복근', rest:false }
+};
+
+// ── 닭가슴살 로테이션 (화~토) ─────────────────────────────────
+// 기준: 2026-06-03(화) = 1주차
+// 1행 화수목금토: 중화짜장 / 화이트머쉬룸 / 피클머스타드 / 중화짬뽕 / 핫양념치킨
+// 2행 화수목금토: 스위트갈릭 / 매콤데리야끼 / 떡볶이맛 / 볼케이노 / 청양마요
+var CHICK_A = ['중화짜장','화이트머쉬룸','피클머스타드','중화짬뽕','핫양념치킨'];
+var CHICK_B = ['스위트갈릭','매콤데리야끼','떡볶이맛','볼케이노','청양마요'];
+var ROT_BASE = new Date(2026,5,3); // 6/3 화요일 기준
+
+function getChickWeek() {
+  var now = new Date(); now.setHours(0,0,0,0);
+  var dow = now.getDay();
+  var diff = (dow >= 2) ? (dow-2) : (7+dow-2);
+  var tue  = new Date(now); tue.setDate(now.getDate()-diff); tue.setHours(0,0,0,0);
+  var weeks = Math.round((tue - ROT_BASE)/(7*86400000));
+  return ((weeks % 2) + 2) % 2; // 0 = A행 먼저, 1 = B행 먼저 (주차별 교체)
+}
+
+// ── 날짜 키 ──────────────────────────────────────────────────
+function dateKey(d) {
+  d = d || new Date();
+  return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
+}
+
+// ── localStorage helpers ─────────────────────────────────────
+function lsGet(k){ try{ return JSON.parse(localStorage.getItem(k)||'null'); }catch(e){return null;} }
+function lsSet(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
+
+// ── D-day & 진행률 ───────────────────────────────────────────
+function initDday() {
+  var now  = new Date(); now.setHours(0,0,0,0);
+  var diff = Math.ceil((TARGET-now)/86400000);
+  var el   = Math.round((now-START)/86400000);
+  var pct  = Math.min(100, Math.max(0, Math.round(el/TOTAL*100)));
+  document.getElementById('dday-num').textContent = Math.max(0,diff);
+  document.getElementById('hero-date').textContent =
+    (now.getMonth()+1)+'월 '+now.getDate()+'일 ('+DOW_KR[now.getDay()]+') · 시작 후 '+el+'일째';
+  document.getElementById('prog-pct').textContent = pct+'%';
+  setTimeout(function(){ document.getElementById('prog-bar').style.width = pct+'%'; }, 100);
+}
+
+// ── 스탯 스트립 ──────────────────────────────────────────────
+function initStats() {
+  // 오늘 체중·BMI
+  var log = lsGet('log_'+dateKey());
+  if (log && log.weight) {
+    var w = parseFloat(log.weight);
+    document.getElementById('stat-weight').textContent = w.toFixed(1);
+    document.getElementById('stat-bmi').textContent = (w/(HEIGHT_M*HEIGHT_M)).toFixed(1);
+  }
+  // 이번 주 러닝 거리 합산 (월~일)
+  var now = new Date(); now.setHours(0,0,0,0);
+  var mon = new Date(now);
+  var dd  = now.getDay() === 0 ? 6 : now.getDay()-1;
+  mon.setDate(now.getDate()-dd);
+  var totalKm = 0;
+  for (var i=0; i<=6; i++) {
+    var d = new Date(mon); d.setDate(mon.getDate()+i);
+    var l = lsGet('log_'+dateKey(d));
+    if (l && l.km) totalKm += parseFloat(l.km)||0;
+  }
+  document.getElementById('stat-weekly-km').textContent = totalKm.toFixed(1);
+}
+
+// ── 오늘의 루틴 ──────────────────────────────────────────────
+function renderToday() {
+  var dow = new Date().getDay();
+  var w   = WORKOUTS[dow];
+  document.getElementById('tw-morning').textContent = w.morning;
+  document.getElementById('tw-evening').textContent = w.evening;
+
+  var lunchEl = document.getElementById('today-lunch');
+  if (dow === 0 || dow === 1) {
+    lunchEl.textContent = '원물 닭가슴살 2개';
+  } else {
+    var idx  = dow-2; // 화=0…토=4
+    var wk   = getChickWeek();
+    var a = wk===0 ? CHICK_A[idx] : CHICK_B[idx];
+    var b = wk===0 ? CHICK_B[idx] : CHICK_A[idx];
+    lunchEl.textContent = a+' 1팩 + '+b+' 1팩';
+  }
+}
+
+// ── 물 트래커 ─────────────────────────────────────────────────
+function renderWater() {
+  var state = lsGet('water_'+dateKey()) || {};
+  var el    = document.getElementById('water-btns');
+  var cnt   = 0;
+  el.innerHTML = '';
+  for (var i=1; i<=8; i++) {
+    (function(n){
+      var btn = document.createElement('button');
+      btn.className = 'water-btn' + (state[n] ? ' done' : '');
+      btn.textContent = state[n] ? '💧' : '○';
+      btn.title = (n*500)+'ml';
+      btn.onclick = function(){
+        var s = lsGet('water_'+dateKey()) || {};
+        s[n] = !s[n];
+        lsSet('water_'+dateKey(), s);
+        renderWater();
+      };
+      el.appendChild(btn);
+    })(i);
+    if (state[i]) cnt++;
+  }
+  document.getElementById('water-count').textContent = cnt+' / 8';
+  document.getElementById('water-sub').textContent   = (cnt*500).toLocaleString()+' ml / 4,000 ml';
+}
+
+// ── 체크리스트 ────────────────────────────────────────────────
+var CHECKS = [
+  { id:'squat', icon:'🦵', text:'스쿼트 30 + 카프레이즈 30 × 4회', badge:'9시·점심·15시·퇴근' },
+  { id:'supp',  icon:'💊', text:'영양제 (유산균·비맥스골드·오메가3)', badge:'기상·점심후·저녁후' },
+];
+
+function renderChecklist() {
+  var state = lsGet('checks_'+dateKey()) || {};
+  var el    = document.getElementById('checklist');
+  el.innerHTML = '';
+  CHECKS.forEach(function(c){
+    var div = document.createElement('div');
+    div.className = 'check-item'+(state[c.id]?' done':'');
+    div.innerHTML = '<div class="chk-box">✓</div>'
+      +'<span style="font-size:15px;">'+c.icon+'</span>'
+      +'<span class="chk-text">'+c.text+'</span>'
+      +(c.badge?'<span class="chk-badge">'+c.badge+'</span>':'');
+    div.onclick = function(){
+      var s = lsGet('checks_'+dateKey())||{};
+      s[c.id]=!s[c.id];
+      lsSet('checks_'+dateKey(),s);
+      renderChecklist();
+    };
+    el.appendChild(div);
+  });
+}
+
+function resetAll() {
+  var k = dateKey();
+  ['water_','checks_'].forEach(function(p){ try{localStorage.removeItem(p+k);}catch(e){} });
+  renderWater();
+  renderChecklist();
+}
+
+// ── 데일리 로그 ──────────────────────────────────────────────
+function loadLog() {
+  var log = lsGet('log_'+dateKey());
+  if (!log) return;
+  if (log.weight) document.getElementById('log-weight').value = log.weight;
+  if (log.km)     document.getElementById('log-km').value     = log.km;
+  if (log.min)    document.getElementById('log-min').value    = log.min;
+  if (log.kcal)   document.getElementById('log-kcal').value   = log.kcal;
+  if (log.note)   document.getElementById('log-note').value   = log.note;
+}
+
+function saveLog() {
+  var log = {
+    weight: document.getElementById('log-weight').value,
+    km:     document.getElementById('log-km').value,
+    min:    document.getElementById('log-min').value,
+    kcal:   document.getElementById('log-kcal').value,
+    note:   document.getElementById('log-note').value
+  };
+  lsSet('log_'+dateKey(), log);
+  document.getElementById('log-saved').textContent = '✅ 저장됐어요!';
+  setTimeout(function(){ document.getElementById('log-saved').textContent=''; },2000);
+  // 스탯 업데이트
+  initStats();
+  renderTrendChart();
+}
+
+// ── 주간 캘린더 ──────────────────────────────────────────────
+function renderWeekGrid() {
+  var now  = new Date(); now.setHours(0,0,0,0);
+  var dow  = now.getDay();
+  var el   = document.getElementById('week-grid');
+  var icons= {0:'🏃',1:'🚶',2:'🏃',3:'🏃',4:'🏃',5:'🏃',6:'🏋️'};
+  [1,2,3,4,5,6,0].forEach(function(d){
+    var div   = document.createElement('div');
+    var isToday = d===dow;
+    var w = WORKOUTS[d];
+    div.className = 'week-day'+(isToday?' today':'')+(w.rest?' rest':'');
+    div.innerHTML = '<div class="w-name">'+DOW_KR[d]+'</div>'
+      +'<div class="w-icon">'+icons[d]+'</div>'
+      +'<div class="w-detail">'+w.morning.split(' ')[0]+(w.morning.includes('km')?' '+w.morning.split(' ')[1]:'')+'</div>';
+    el.appendChild(div);
+  });
+}
+
+// ── 닭가슴살 로테이션 표 ─────────────────────────────────────
+function renderLunchRot() {
+  var dow  = new Date().getDay();
+  var wk   = getChickWeek();
+  var el   = document.getElementById('lunch-rot');
+  ['화','수','목','금','토'].forEach(function(d,i){
+    var realDow = i+2;
+    var isToday = dow===realDow;
+    var a = wk===0 ? CHICK_A[i] : CHICK_B[i];
+    var b = wk===0 ? CHICK_B[i] : CHICK_A[i];
+    var div = document.createElement('div');
+    div.className = 'rot-item'+(isToday?' today-rot':'');
+    div.innerHTML = '<div class="rot-dow">'+d+'</div>'
+      +'<div class="rot-name">'+a+'</div>'
+      +'<div class="rot-div"></div>'
+      +'<div class="rot-name">'+b+'</div>';
+    el.appendChild(div);
+  });
+}
+
+// ── 초기화 ───────────────────────────────────────────────────
+initDday();
+renderToday();
+initStats();
+renderWater();
+renderChecklist();
+loadLog();
+renderWeekGrid();
+renderLunchRot();
+renderTrendChart();
+</script>
+</body>
+</html>
