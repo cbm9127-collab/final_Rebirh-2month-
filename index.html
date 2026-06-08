@@ -70,9 +70,10 @@ body{background:var(--black);color:var(--white);font-family:'Noto Sans KR',sans-
 .water-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
 .water-title{font-size:13px;font-weight:700;}
 .water-count{font-size:12px;color:var(--green);font-weight:700;}
-.water-btns{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;}
-.water-btn{aspect-ratio:1;border-radius:50%;border:2px solid var(--grey2);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all .15s;color:var(--grey2);}
+.water-btns{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;}
+.water-btn{width:100%;padding:7px 4px;border-radius:8px;border:1.5px solid var(--grey2);background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:13px;gap:2px;transition:all .15s;color:var(--grey2);}
 .water-btn.done{border-color:var(--green);background:rgba(0,217,126,0.15);color:var(--green);}
+.water-btn .w-oz{font-size:9px;font-weight:600;line-height:1;}
 .water-sub{font-size:10px;color:var(--grey);margin-top:8px;text-align:center;}
 
 /* ── 체크리스트 ── */
@@ -201,6 +202,31 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
 
 
 
+  <!-- 오늘의 루틴 (2×2) -->
+  <div class="section">
+    <div class="sec-label">오늘의 루틴</div>
+    <div class="today-grid">
+      <div class="today-card tc-green">
+        <div class="tc-time">🌅 아침 운동</div>
+        <div class="tc-name" id="tw-morning">—</div>
+      </div>
+      <div class="today-card tc-green">
+        <div class="tc-time">🌙 저녁 운동</div>
+        <div class="tc-name" id="tw-evening">—</div>
+      </div>
+      <div class="today-card">
+        <div class="tc-time">☀️ 점심</div>
+        <div class="tc-name" id="today-lunch">—</div>
+        <div class="tc-sub">찐고구마 200g · 양배추 150g<br>느타리버섯 150g · 두부 150g</div>
+      </div>
+      <div class="today-card">
+        <div class="tc-time">🌙 저녁</div>
+        <div class="tc-name">한입 닭가슴살 1팩</div>
+        <div class="tc-sub">오트밀 55g + 계란 2개<br>올리브오일 5cc</div>
+      </div>
+    </div>
+  </div>
+
   <!-- 데일리 로그 -->
   <div class="section">
     <div class="sec-label">오늘의 기록</div>
@@ -229,43 +255,35 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
     </div>
   </div>
 
-  <!-- 오늘의 루틴 (2×2) -->
-  <div class="section">
-    <div class="sec-label">오늘의 루틴</div>
-    <div class="today-grid">
-      <div class="today-card tc-green">
-        <div class="tc-time">🌅 아침 운동</div>
-        <div class="tc-name" id="tw-morning">—</div>
-      </div>
-      <div class="today-card tc-green">
-        <div class="tc-time">🌙 저녁 운동</div>
-        <div class="tc-name" id="tw-evening">—</div>
-      </div>
-      <div class="today-card">
-        <div class="tc-time">☀️ 점심</div>
-        <div class="tc-name" id="today-lunch">—</div>
-        <div class="tc-sub">찐고구마 200g · 양배추 150g<br>느타리버섯 150g · 두부 150g</div>
-      </div>
-      <div class="today-card">
-        <div class="tc-time">🌙 저녁</div>
-        <div class="tc-name">한입 닭가슴살 1팩</div>
-        <div class="tc-sub">오트밀 55g + 계란 2개<br>올리브오일 5cc</div>
-      </div>
-    </div>
-  </div>
-
   <!-- 물 트래커 -->
   <div class="section">
     <div class="sec-label">Daily Checklist</div>
     <div class="water-wrap">
       <div class="water-top">
-        <div class="water-title">💧 물 4L</div>
+        <div class="water-title">💧 물 (30oz × 5)</div>
         <div class="water-count" id="water-count">0 / 8</div>
       </div>
       <div class="water-btns" id="water-btns"></div>
       <div class="water-sub" id="water-sub">0 ml / 4,000 ml</div>
     </div>
-    <div class="checklist" id="checklist"></div>
+    <!-- 스쿼트/카프레이즈 -->
+    <div class="water-wrap" style="margin-top:8px;">
+      <div class="water-top">
+        <div class="water-title">🦵 스쿼트 30 + 카프레이즈 30</div>
+        <div class="water-count" id="squat-count">0 / 4</div>
+      </div>
+      <div class="water-btns" id="squat-btns" style="grid-template-columns:repeat(4,1fr);"></div>
+    </div>
+
+    <!-- 영양제 -->
+    <div class="water-wrap" style="margin-top:8px;">
+      <div class="water-top">
+        <div class="water-title">💊 영양제</div>
+        <div class="water-count" id="supp-count">0 / 3</div>
+      </div>
+      <div class="water-btns" id="supp-btns" style="grid-template-columns:repeat(3,1fr);"></div>
+    </div>
+
     <button class="reset-btn" onclick="resetAll()">↺ 오늘 초기화</button>
   </div>
 
@@ -512,12 +530,12 @@ function renderWater() {
   var el    = document.getElementById('water-btns');
   var cnt   = 0;
   el.innerHTML = '';
-  for (var i=1; i<=8; i++) {
+  for (var i=1; i<=5; i++) {
     (function(n){
       var btn = document.createElement('button');
       btn.className = 'water-btn' + (state[n] ? ' done' : '');
-      btn.textContent = state[n] ? '💧' : '○';
-      btn.title = (n*500)+'ml';
+      btn.innerHTML = (state[n] ? '💧' : '○') + '<span class="w-oz">30oz</span>';
+      btn.title = '30oz ('+(n*887)+'ml)';
       btn.onclick = function(){
         var s = lsGet('water_'+dateKey()) || {};
         s[n] = !s[n];
@@ -528,40 +546,57 @@ function renderWater() {
     })(i);
     if (state[i]) cnt++;
   }
-  document.getElementById('water-count').textContent = cnt+' / 8';
-  document.getElementById('water-sub').textContent   = (cnt*500).toLocaleString()+' ml / 4,000 ml';
+  document.getElementById('water-count').textContent = cnt+' / 5';
+  document.getElementById('water-sub').textContent   = (cnt*887).toLocaleString()+' ml / 4,435 ml  ('+cnt*30+'oz / 150oz)';
 }
 
-// ── 체크리스트 ────────────────────────────────────────────────
-var CHECKS = [
-  { id:'squat', icon:'🦵', text:'스쿼트 30 + 카프레이즈 30 × 4회', badge:'9시·점심·15시·퇴근' },
-  { id:'supp',  icon:'💊', text:'영양제 (유산균·비맥스골드·오메가3)', badge:'기상·점심후·저녁후' },
-];
+// ── 스쿼트 & 영양제 버튼 ─────────────────────────────────────
+var SQUAT_TIMES = ['9시','점심 후','15시','퇴근 전'];
+var SUPP_TIMES  = ['기상 직후','점심 식후','저녁 식후'];
 
-function renderChecklist() {
-  var state = lsGet('checks_'+dateKey()) || {};
-  var el    = document.getElementById('checklist');
-  el.innerHTML = '';
-  CHECKS.forEach(function(c){
-    var div = document.createElement('div');
-    div.className = 'check-item'+(state[c.id]?' done':'');
-    div.innerHTML = '<div class="chk-box">✓</div>'
-      +'<span style="font-size:15px;">'+c.icon+'</span>'
-      +'<span class="chk-text">'+c.text+'</span>'
-      +(c.badge?'<span class="chk-badge">'+c.badge+'</span>':'');
-    div.onclick = function(){
-      var s = lsGet('checks_'+dateKey())||{};
-      s[c.id]=!s[c.id];
-      lsSet('checks_'+dateKey(),s);
-      renderChecklist();
+function renderSquatBtns() {
+  var state = lsGet('squat_'+dateKey()) || {};
+  var el = document.getElementById('squat-btns'); if(!el) return;
+  var cnt = 0; el.innerHTML = '';
+  SQUAT_TIMES.forEach(function(t, i) {
+    var btn = document.createElement('button');
+    var done = !!state[i];
+    if (done) cnt++;
+    btn.className = 'water-btn' + (done ? ' done' : '');
+    btn.innerHTML = (done ? '✅' : '○') + '<span class="w-oz">' + t + '</span>';
+    btn.onclick = function() {
+      var s = lsGet('squat_'+dateKey()) || {};
+      s[i] = !s[i]; lsSet('squat_'+dateKey(), s); renderSquatBtns();
     };
-    el.appendChild(div);
+    el.appendChild(btn);
   });
+  document.getElementById('squat-count').textContent = cnt + ' / 4';
 }
+
+function renderSuppBtns() {
+  var state = lsGet('supp_'+dateKey()) || {};
+  var el = document.getElementById('supp-btns'); if(!el) return;
+  var cnt = 0; el.innerHTML = '';
+  SUPP_TIMES.forEach(function(t, i) {
+    var btn = document.createElement('button');
+    var done = !!state[i];
+    if (done) cnt++;
+    btn.className = 'water-btn' + (done ? ' done' : '');
+    btn.innerHTML = (done ? '✅' : '💊') + '<span class="w-oz">' + t + '</span>';
+    btn.onclick = function() {
+      var s = lsGet('supp_'+dateKey()) || {};
+      s[i] = !s[i]; lsSet('supp_'+dateKey(), s); renderSuppBtns();
+    };
+    el.appendChild(btn);
+  });
+  document.getElementById('supp-count').textContent = cnt + ' / 3';
+}
+
+function renderChecklist() { renderSquatBtns(); renderSuppBtns(); }
 
 function resetAll() {
   var k = dateKey();
-  ['water_','checks_'].forEach(function(p){ try{localStorage.removeItem(p+k);}catch(e){} });
+  ['water_','checks_','squat_','supp_'].forEach(function(p){ try{localStorage.removeItem(p+k);}catch(e){} });
   renderWater();
   renderChecklist();
 }
