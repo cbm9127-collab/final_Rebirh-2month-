@@ -58,7 +58,7 @@ body{background:var(--black);color:var(--white);font-family:'Noto Sans KR',sans-
 .prog-sub{font-size:11px;color:var(--grey);}
 
 /* ── 오늘의 루틴 2×2 ── */
-.today-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.today-grid{display:flex;flex-direction:column;gap:8px;}
 .today-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px 14px;min-height:100px;}
 .tc-time{font-size:10px;letter-spacing:1.5px;color:var(--grey);font-weight:600;margin-bottom:8px;}
 .tc-name{font-size:13px;font-weight:700;color:var(--white);line-height:1.45;}
@@ -133,7 +133,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
 .reset-btn:hover{border-color:var(--border2);color:var(--white);}
 
 @media(max-width:540px){
-  .today-grid{grid-template-columns:1fr;}
+
   .rot-grid{grid-template-columns:repeat(3,1fr);}
   .video-grid{grid-template-columns:1fr 1fr;}
   .log-grid{grid-template-columns:1fr 1fr;}
@@ -206,23 +206,34 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
   <div class="section">
     <div class="sec-label">오늘의 루틴</div>
     <div class="today-grid">
-      <div class="today-card tc-green">
-        <div class="tc-time">🌅 아침 운동</div>
-        <div class="tc-name" id="tw-morning">—</div>
+      <!-- 운동 2개: 1행 -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div class="today-card tc-green">
+          <div class="tc-time">🌅 아침 운동</div>
+          <div class="tc-name" id="tw-morning">—</div>
+        </div>
+        <div class="today-card tc-green">
+          <div class="tc-time">🌙 저녁 운동</div>
+          <div class="tc-name" id="tw-evening">—</div>
+        </div>
       </div>
-      <div class="today-card tc-green">
-        <div class="tc-time">🌙 저녁 운동</div>
-        <div class="tc-name" id="tw-evening">—</div>
-      </div>
-      <div class="today-card">
-        <div class="tc-time">☀️ 점심</div>
-        <div class="tc-name" id="today-lunch">—</div>
-        <div class="tc-sub">찐고구마 200g · 양배추 150g<br>느타리버섯 150g · 두부 150g</div>
-      </div>
-      <div class="today-card">
-        <div class="tc-time">🌙 저녁</div>
-        <div class="tc-name">한입 닭가슴살 1팩</div>
-        <div class="tc-sub">오트밀 55g + 계란 2개<br>올리브오일 5cc</div>
+      <!-- 식단 3개: 2행 -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+        <div class="today-card">
+          <div class="tc-time">🌅 아침</div>
+          <div class="tc-name">그릭요거트 + 계란 2개</div>
+          <div class="tc-sub">바나나 1개 · 유산균</div>
+        </div>
+        <div class="today-card">
+          <div class="tc-time">☀️ 점심</div>
+          <div class="tc-name" id="today-lunch">—</div>
+          <div class="tc-sub" id="today-lunch-sub">감자 250g · 양배추 · 올리브오일</div>
+        </div>
+        <div class="today-card">
+          <div class="tc-time">🌙 저녁</div>
+          <div class="tc-name" id="today-dinner-name">한입쏙 닭가슴살(청양고추)</div>
+          <div class="tc-sub">오트밀 55g + 계란 2개<br>올리브오일 5cc</div>
+        </div>
       </div>
     </div>
   </div>
@@ -231,6 +242,9 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
   <div class="section">
     <div class="sec-label">오늘의 기록</div>
     <div class="log-card">
+      <!-- 운동 완료 체크 -->
+      <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;" id="workout-checks"></div>
+
       <div class="log-grid">
         <div class="log-field">
           <div class="log-lbl">체중 (kg)</div>
@@ -297,7 +311,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
   <!-- 닭가슴살 로테이션 -->
   <div class="section">
     <div class="sec-label">이번 주 점심 닭가슴살 로테이션</div>
-    <div class="rot-grid" id="lunch-rot"></div>
+    <div class="rot-grid" id="lunch-rot" style="grid-template-columns:repeat(7,1fr);"></div>
   </div>
 
   <!-- 영상 링크 -->
@@ -512,15 +526,33 @@ function renderToday() {
   document.getElementById('tw-morning').textContent = w.morning;
   document.getElementById('tw-evening').textContent = w.evening;
 
-  var lunchEl = document.getElementById('today-lunch');
-  if (dow === 0 || dow === 1) {
-    lunchEl.textContent = '원물 닭가슴살 2개';
+  var lunchEl    = document.getElementById('today-lunch');
+  var lunchSub   = document.getElementById('today-lunch-sub');
+  var dinnerName = document.getElementById('today-dinner-name');
+
+  // 일요일 = 리피드데이 (점심 변경)
+  if (dow === 0) {
+    lunchEl.textContent  = '🔄 리피드데이 — 돼지목심 250g';
+    if (lunchSub) lunchSub.textContent = '상추 충분히 · 쌈무 5~10장';
+  } else if (dow === 1) {
+    lunchEl.textContent  = '원물 닭가슴살 2팩';
+    if (lunchSub) lunchSub.textContent = '감자 250g · 양배추 150g · 올리브오일 5cc';
   } else {
-    var idx  = dow-2; // 화=0…토=4
+    var idx  = dow-2;
     var wk   = getChickWeek();
     var a = wk===0 ? CHICK_A[idx] : CHICK_B[idx];
     var b = wk===0 ? CHICK_B[idx] : CHICK_A[idx];
-    lunchEl.textContent = a+' 1팩 + '+b+' 1팩';
+    lunchEl.textContent  = a+' + '+b+' (각 1팩)';
+    if (lunchSub) lunchSub.textContent = '감자 250g · 양배추 150g · 올리브오일 5cc';
+  }
+
+  // 화/목/토 = 근력운동일 → 단백질쉐이크 안내
+  if (dow === 2 || dow === 4 || dow === 6) {
+    if (dinnerName) dinnerName.innerHTML =
+      '한입쏙 닭가슴살(청양고추) 200g'
+      + '<div style="margin-top:6px;font-size:11px;color:#FF6B35;font-weight:600;">🥤 17:30 단백질쉐이크 1스쿱 → 19:00 덤벨 홈트</div>';
+  } else {
+    if (dinnerName) dinnerName.textContent = '한입쏙 닭가슴살(청양고추) 200g';
   }
 }
 
@@ -602,8 +634,43 @@ function resetAll() {
 }
 
 // ── 데일리 로그 ──────────────────────────────────────────────
+// 오늘 운동 항목
+function getTodayWorkouts() {
+  var dow = new Date().getDay();
+  var w = WORKOUTS[dow];
+  if (!w || w.rest) return [];
+  var items = [];
+  if (w.morning && w.morning !== '휴식') items.push(w.morning);
+  if (w.evening) items.push(w.evening);
+  if (dow===2||dow===4||dow===6) items.push('단백질쉐이크');
+  return items;
+}
+
+function renderWorkoutChecks() {
+  var el = document.getElementById('workout-checks');
+  if (!el) return;
+  var items = getTodayWorkouts();
+  var state = (lsGet('log_'+dateKey())||{}).workouts || {};
+  el.innerHTML = '';
+  items.forEach(function(item, i) {
+    var done = !!state[i];
+    var btn = document.createElement('button');
+    btn.style.cssText = 'padding:6px 12px;border-radius:8px;border:1.5px solid '+(done?'var(--green)':'var(--grey2)')+';background:'+(done?'rgba(0,217,126,0.12)':'transparent')+';color:'+(done?'var(--green)':'var(--grey)')+';font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s;';
+    btn.textContent = (done ? '✅ ' : '○ ') + item;
+    btn.onclick = function() {
+      var log = lsGet('log_'+dateKey()) || {};
+      if (!log.workouts) log.workouts = {};
+      log.workouts[i] = !log.workouts[i];
+      lsSet('log_'+dateKey(), log);
+      renderWorkoutChecks();
+    };
+    el.appendChild(btn);
+  });
+}
+
 function loadLog() {
   var log = lsGet('log_'+dateKey());
+  renderWorkoutChecks();
   if (!log) return;
   if (log.weight) document.getElementById('log-weight').value = log.weight;
   if (log.km)     document.getElementById('log-km').value     = log.km;
@@ -613,12 +680,14 @@ function loadLog() {
 }
 
 function saveLog() {
+  var existing = lsGet('log_'+dateKey()) || {};
   var log = {
-    weight: document.getElementById('log-weight').value,
-    km:     document.getElementById('log-km').value,
-    min:    document.getElementById('log-min').value,
-    kcal:   document.getElementById('log-kcal').value,
-    note:   document.getElementById('log-note').value
+    weight:   document.getElementById('log-weight').value,
+    km:       document.getElementById('log-km').value,
+    min:      document.getElementById('log-min').value,
+    kcal:     document.getElementById('log-kcal').value,
+    note:     document.getElementById('log-note').value,
+    workouts: existing.workouts || {}
   };
   lsSet('log_'+dateKey(), log);
   document.getElementById('log-saved').textContent = '✅ 저장됐어요!';
@@ -651,14 +720,32 @@ function renderLunchRot() {
   var dow  = new Date().getDay();
   var wk   = getChickWeek();
   var el   = document.getElementById('lunch-rot');
+
+  // 월: 원물, 일: 리피드
+  var fixed = [
+    { d:'월', txt:'원물 닭가슴살', sub:'2팩', dow:1 },
+    { d:'일', txt:'🔄 리피드데이', sub:'돼지목심 250g', dow:0 }
+  ];
+  fixed.forEach(function(f){
+    var div = document.createElement('div');
+    div.className = 'rot-item'+(dow===f.dow?' today-rot':'');
+    div.innerHTML = '<div class="rot-dow">'+f.d+'</div>'
+      +'<div class="rot-name">'+f.txt+'</div>'
+      +'<div class="rot-div"></div>'
+      +'<div class="rot-name">'+f.sub+'</div>';
+    el.appendChild(div);
+  });
+
+  // 화~토 로테이션
   ['화','수','목','금','토'].forEach(function(d,i){
     var realDow = i+2;
     var isToday = dow===realDow;
     var a = wk===0 ? CHICK_A[i] : CHICK_B[i];
     var b = wk===0 ? CHICK_B[i] : CHICK_A[i];
+    var isStrength = (realDow===2||realDow===4||realDow===6);
     var div = document.createElement('div');
     div.className = 'rot-item'+(isToday?' today-rot':'');
-    div.innerHTML = '<div class="rot-dow">'+d+'</div>'
+    div.innerHTML = '<div class="rot-dow">'+d+(isStrength?' 💪':'')+'</div>'
       +'<div class="rot-name">'+a+'</div>'
       +'<div class="rot-div"></div>'
       +'<div class="rot-name">'+b+'</div>';
