@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Re:birth — 기록 히스토리</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --black:#0A0A0A; --card:#181818; --card2:#1E1E1E;
+  --border:rgba(255,255,255,0.08); --border2:rgba(255,255,255,0.13);
+  --green:#00D97E; --green2:#00A85A; --green-bg:rgba(0,217,126,0.08);
+  --white:#F5F5F0; --grey:#888; --grey2:#444;
+  --orange:#FF6B35; --orange-bg:rgba(255,107,53,0.1);
+  --radius:14px; --radius-s:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--black);color:var(--white);font-family:'Noto Sans KR',sans-serif;min-height:100vh;padding-bottom:60px;}
+
+/* ── 헤더 ── */
+.header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(10,10,10,.92);backdrop-filter:blur(10px);z-index:50;max-width:100%;}
+.back-btn{background:none;border:1px solid var(--border2);border-radius:8px;color:var(--grey);font-size:12px;padding:6px 12px;cursor:pointer;font-family:inherit;text-decoration:none;display:inline-flex;align-items:center;gap:5px;}
+.back-btn:hover{color:var(--white);border-color:var(--green);}
+.header-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:var(--green);}
+
+/* ── 요약 통계 ── */
+.summary{padding:20px;max-width:720px;margin:0 auto;}
+.sum-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:20px;}
+.sum-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-s);padding:14px 10px;text-align:center;}
+.sum-num{font-size:22px;font-weight:800;color:var(--green);line-height:1;}
+.sum-lbl{font-size:10px;color:var(--grey);margin-top:4px;}
+
+/* ── 필터 ── */
+.filter-row{display:flex;gap:8px;align-items:center;margin-bottom:16px;flex-wrap:wrap;}
+.filter-inp{background:var(--card);border:1px solid var(--border2);border-radius:8px;color:var(--white);font-size:12px;padding:7px 12px;outline:none;font-family:inherit;width:130px;}
+.filter-inp:focus{border-color:var(--green);}
+.filter-btn{background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--grey);font-size:11px;font-weight:600;padding:7px 12px;cursor:pointer;font-family:inherit;transition:all .15s;}
+.filter-btn.active{background:var(--green-bg);border-color:var(--green);color:var(--green);}
+.result-count{font-size:11px;color:var(--grey);margin-left:auto;}
+
+/* ── 기록 리스트 ── */
+.wrap{max-width:720px;margin:0 auto;padding:0 20px;}
+.record-list{display:flex;flex-direction:column;gap:10px;}
+
+.rec-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;transition:border-color .15s;}
+.rec-card:hover{border-color:var(--border2);}
+.rec-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+.rec-date{font-size:14px;font-weight:700;}
+.rec-dow{font-size:11px;color:var(--grey);margin-top:1px;}
+.rec-weight{font-size:22px;font-weight:800;color:var(--green);line-height:1;}
+.rec-weight-diff{font-size:11px;margin-top:2px;font-weight:600;}
+.diff-down{color:var(--green);}
+.diff-up{color:var(--orange);}
+.diff-same{color:var(--grey);}
+
+/* 메트릭 */
+.rec-metrics{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;}
+.rec-metric{background:var(--card2);border-radius:7px;padding:6px 10px;font-size:11px;font-weight:600;color:var(--grey);display:flex;align-items:center;gap:4px;}
+.rec-metric span{color:var(--white);}
+.rec-metric.run{border-left:2px solid var(--green);}
+.rec-metric.workout{border-left:2px solid var(--orange);}
+
+
+
+/* 메모 */
+.rec-note{font-size:12px;color:var(--grey);background:rgba(255,255,255,0.03);border-radius:7px;padding:8px 10px;line-height:1.6;font-style:italic;border-left:2px solid var(--border2);}
+
+/* 로딩·에러·빈상태 */
+.state-box{text-align:center;padding:60px 20px;}
+.state-icon{font-size:40px;margin-bottom:10px;}
+.state-title{font-size:15px;font-weight:700;color:var(--grey);margin-bottom:6px;}
+.state-sub{font-size:12px;color:var(--grey2);}
+.spinner{width:28px;height:28px;border:2.5px solid var(--border2);border-top-color:var(--green);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 12px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+@media(max-width:540px){
+  .sum-grid{grid-template-columns:repeat(2,1fr);}
+  .rec-weight{font-size:18px;}
+  .header-title{font-size:18px;}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <a class="back-btn" href="index.html">← 돌아가기</a>
+  <div class="header-title">HISTORY</div>
+  <div style="width:80px;"></div>
+</div>
+
+<div class="summary">
+  <!-- 요약 통계 -->
+  <div class="sum-grid">
+    <div class="sum-card"><div class="sum-num" id="s-days">—</div><div class="sum-lbl">기록 일수</div></div>
+    <div class="sum-card"><div class="sum-num" id="s-km">—</div><div class="sum-lbl">총 러닝 km</div></div>
+    <div class="sum-card"><div class="sum-num" id="s-avg-pace">—</div><div class="sum-lbl">평균 페이스</div></div>
+    <div class="sum-card"><div class="sum-num" id="s-weight-diff">—</div><div class="sum-lbl">기간 체중 변화</div></div>
+  </div>
+
+  <!-- 필터 -->
+  <div class="filter-row">
+    <input class="filter-inp" type="month" id="filter-month" placeholder="년-월">
+    <div class="result-count" id="result-count"></div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div id="record-list">
+    <div class="state-box">
+      <div class="spinner"></div>
+      <div class="state-title">기록을 불러오는 중...</div>
+    </div>
+  </div>
+</div>
+
+<script>
+var GAS_URL = 'https://script.google.com/macros/s/AKfycbysLmM_fov67_179-Td84CI8v5ZNW1aKSotd1eAFFhZkAX4mDuqGmZdX8F2C30Ed63kMQ/exec';
+var DOW_KR  = ['일','월','화','수','목','금','토'];
+var allData = [];
+var curFilter = 'all';
+
+// ── 데이터 로드 ───────────────────────────────────────────────
+async function loadData() {
+  try {
+    var res  = await fetch(GAS_URL);
+    var rows = await res.json();
+
+    // 날짜 파싱 + 최신순 정렬
+    allData = rows
+      .filter(function(r){ return r['날짜']; })
+      .map(function(r){
+        var rawDate = String(r['날짜']).slice(0,10); // 'YYYY-MM-DD' 만 추출
+    var parts = rawDate.split('-');
+    var d = new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
+        return {
+          date:    r['날짜'],
+          dateObj: d,
+          dow:     DOW_KR[d.getDay()],
+          weight:  parseFloat(r['체중'])   || null,
+          km:      parseFloat(r['러닝km']) || null,
+          min:     parseInt(r['시간min'])  || null,
+          kcal:    parseInt(r['칼로리'])   || null,
+          workout: r['운동완료'] || '',
+          water:   r['물']      || '',
+          squat:   r['스쿼트']  || '',
+          supp:    r['영양제']  || '',
+          note:    r['메모']    || ''
+        };
+      })
+      .sort(function(a,b){ return b.dateObj - a.dateObj; });
+
+    renderSummary();
+    renderList();
+  } catch(e) {
+    document.getElementById('record-list').innerHTML =
+      '<div class="state-box"><div class="state-icon">⚠️</div>'
+      +'<div class="state-title">데이터를 불러오지 못했어요</div>'
+      +'<div class="state-sub">'+e.message+'</div></div>';
+  }
+}
+
+// ── 요약 통계 ─────────────────────────────────────────────────
+function renderSummary() {
+  document.getElementById('s-days').textContent = allData.length;
+
+  var totalKm = allData.reduce(function(s,r){ return s+(r.km||0); }, 0);
+  document.getElementById('s-km').textContent = totalKm.toFixed(1);
+
+  // 평균 페이스
+  var runRows = allData.filter(function(r){ return r.km && r.min; });
+  if (runRows.length) {
+    var avgPace = runRows.reduce(function(s,r){ return s + r.min/r.km; }, 0) / runRows.length;
+    var m = Math.floor(avgPace), sec = Math.round((avgPace-m)*60);
+    document.getElementById('s-avg-pace').textContent = m+"'"+String(sec).padStart(2,'0')+'"';
+  }
+
+  // 체중 변화 (최초 vs 최신)
+  var wRows = allData.filter(function(r){ return r.weight; });
+  if (wRows.length >= 2) {
+    var first = wRows[wRows.length-1].weight;
+    var last  = wRows[0].weight;
+    var diff  = (last - first).toFixed(1);
+    var el    = document.getElementById('s-weight-diff');
+    el.textContent = (diff > 0 ? '+' : '') + diff + 'kg';
+    el.style.color  = diff < 0 ? '#00D97E' : diff > 0 ? '#FF6B35' : '#888';
+  }
+}
+
+// ── 페이스 계산 ───────────────────────────────────────────────
+function pace(km, min) {
+  if (!km || !min) return null;
+  var p = min/km, m = Math.floor(p), s = Math.round((p-m)*60);
+  return m+"'"+String(s).padStart(2,'0')+'"';
+}
+
+// ── 날짜 포맷 ─────────────────────────────────────────────────
+function fmtDate(r) {
+  var d = r.dateObj;
+  return d.getFullYear()+'년 '+(d.getMonth()+1)+'월 '+d.getDate()+'일';
+}
+
+// ── 카드 렌더 ─────────────────────────────────────────────────
+function renderCard(r, prevWeight) {
+  var diffHtml = '';
+  if (r.weight && prevWeight) {
+    var d = (r.weight - prevWeight).toFixed(1);
+    var cls = d < 0 ? 'diff-down' : d > 0 ? 'diff-up' : 'diff-same';
+    diffHtml = '<div class="rec-weight-diff '+cls+'">'+(d>0?'+':'')+d+'kg</div>';
+  }
+
+  var metrics = '';
+  if (r.km || r.min) {
+    var p = pace(r.km, r.min);
+    metrics += '<div class="rec-metric run">'
+      + (r.km ? '<span>'+r.km+'km</span>' : '')
+      + (r.min ? ' · <span>'+r.min+'분</span>' : '')
+      + (p ? ' · <span>'+p+'/km</span>' : '')
+      + (r.kcal ? ' · <span>'+r.kcal+'kcal</span>' : '')
+      + '</div>';
+  }
+  if (r.workout) {
+    metrics += '<div class="rec-metric workout">💪 <span>'+r.workout+'</span></div>';
+  }
+
+  var badges = '';
+
+  var noteHtml = r.note ? '<div class="rec-note">'+r.note+'</div>' : '';
+
+  return '<div class="rec-card">'
+    + '<div class="rec-head">'
+    +   '<div><div class="rec-date">'+fmtDate(r)+'</div>'
+    +   '<div class="rec-dow">'+r.dow+'요일</div></div>'
+    +   (r.weight ? '<div style="text-align:right"><div class="rec-weight">'+r.weight+'<span style="font-size:13px;font-weight:500;color:var(--grey);">kg</span></div>'+diffHtml+'</div>' : '')
+    + '</div>'
+    + (metrics ? '<div class="rec-metrics">'+metrics+'</div>' : '')
+
+    + noteHtml
+    + '</div>';
+}
+
+// ── 필터 + 리스트 렌더 ───────────────────────────────────────
+var curMonth = '';
+function setFilter(type, btn) {
+  curFilter = type;
+  document.querySelectorAll('.filter-btn').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+  renderList();
+}
+
+function renderList() {
+  var month = document.getElementById('filter-month').value; // 'YYYY-MM' or ''
+  var filtered = allData.filter(function(r){
+    if (month && r.date.slice(0,7) !== month) return false;
+    if (curFilter === 'run'  && !r.km) return false;
+    if (curFilter === 'note' && !r.note) return false;
+    return true;
+  });
+
+  document.getElementById('result-count').textContent = filtered.length + '개';
+
+  if (filtered.length === 0) {
+    document.getElementById('record-list').innerHTML =
+      '<div class="state-box"><div class="state-icon">📭</div>'
+      +'<div class="state-title">해당하는 기록이 없어요</div></div>';
+    return;
+  }
+
+  // 체중 비교를 위해 이전 기록의 체중 추적
+  var wMap = {};
+  allData.filter(function(r){ return r.weight; })
+    .forEach(function(r, i, arr){
+      if (i+1 < arr.length) wMap[r.date] = arr[i+1].weight;
+    });
+
+  document.getElementById('record-list').innerHTML =
+    filtered.map(function(r){ return renderCard(r, wMap[r.date]); }).join('');
+}
+
+// ── 월 필터 ──────────────────────────────────────────────────
+document.getElementById('filter-month').addEventListener('change', renderList);
+
+// ── 초기화 ───────────────────────────────────────────────────
+loadData();
+</script>
+</body>
+</html>
