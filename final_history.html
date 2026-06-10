@@ -150,6 +150,15 @@ async function loadData() {
       })
       .sort(function(a,b){ return b.dateObj - a.dateObj; });
 
+    // 같은 날짜 중복 제거 → 가장 마지막에 기록된 것(배열 앞쪽) 유지
+    var seen = {};
+    allData = allData.filter(function(r){
+      var key = r.dateObj.getFullYear()+'-'+(r.dateObj.getMonth()+1)+'-'+r.dateObj.getDate();
+      if (seen[key]) return false;
+      seen[key] = true;
+      return true;
+    });
+
     renderSummary();
     renderList();
   } catch(e) {
