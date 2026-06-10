@@ -382,7 +382,8 @@ function renderTrendChart() {
 
   // 캔버스 설정
   var dpr    = window.devicePixelRatio || 1;
-  var W      = canvas.offsetWidth;
+  var W = canvas.offsetWidth || canvas.parentElement.offsetWidth || 320;
+  if (W < 10) { setTimeout(renderTrendChart, 150); return; }
   var H      = 70;
   canvas.width  = W * dpr;
   canvas.height = H * dpr;
@@ -755,7 +756,7 @@ async function saveLog() {
   }, 2500);
 
   initStats();
-  renderTrendChart();
+  setTimeout(renderTrendChart, 50);
 }
 
 // ── 주간 캘린더 ──────────────────────────────────────────────
@@ -823,7 +824,12 @@ renderChecklist();
 loadLog();
 renderWeekGrid();
 renderLunchRot();
-renderTrendChart();
+// 차트는 DOM 완전 렌더 후 실행
+if (document.readyState === 'complete') {
+  setTimeout(renderTrendChart, 50);
+} else {
+  window.addEventListener('load', function(){ setTimeout(renderTrendChart, 50); });
+}
 </script>
 </body>
 </html>
