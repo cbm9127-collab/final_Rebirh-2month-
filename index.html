@@ -32,6 +32,12 @@ body{background:var(--black);color:var(--white);font-family:'Noto Sans KR',sans-
 .section{margin-bottom:26px;}
 .sec-label{font-size:10px;letter-spacing:3px;font-weight:700;color:var(--green);text-transform:uppercase;margin-bottom:12px;}
 
+/* ── 연동 상태 ── */
+.sync-badge{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;margin-bottom:10px;}
+.sync-badge.syncing{background:rgba(255,165,0,0.12);color:#FFA500;}
+.sync-badge.ok{background:rgba(0,217,126,0.12);color:var(--green);}
+.sync-badge.err{background:rgba(220,50,50,0.12);color:#E05555;}
+
 /* ── 체중 추세 차트 ── */
 .trend-wrap{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:12px;}
 .trend-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
@@ -266,6 +272,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
       <textarea class="log-note" id="log-note" placeholder="특이사항 · 컨디션 · 메모"></textarea>
       <button class="log-save-btn" onclick="saveLog()">저장하기</button>
       <div class="log-saved" id="log-saved"></div>
+      <div id="sync-status"></div>
     </div>
   </div>
 
@@ -439,6 +446,7 @@ function renderTrendChart() {
 }
 
 // ── 상수 ──────────────────────────────────────────────────────
+var GAS_URL = 'https://script.google.com/macros/s/AKfycbysLmM_fov67_179-Td84CI8v5ZNW1aKSotd1eAFFhZkAX4mDuqGmZdX8F2C30Ed63kMQ/exec';
 var HEIGHT_M  = 1.79;
 var START     = new Date(2026,5,9);
 var TARGET    = new Date(2026,6,31);
@@ -679,8 +687,25 @@ function loadLog() {
   if (log.note)   document.getElementById('log-note').value   = log.note;
 }
 
-function saveLog() {
+async function saveLog() {
   var existing = lsGet('log_'+dateKey()) || {};
+  var now  = new Date();
+  var dateStr = now.getFullYear() + '-'
+    + String(now.getMonth()+1).padStart(2,'0') + '-'
+    + String(now.getDate()).padStart(2,'0');
+
+  // 수량 집계
+  var waterState = lsGet('water_'+dateKey()) || {};
+  var squatState = lsGet('squat_'+dateKey()) || {};
+  var suppState  = lsGet('supp_'+dateKey())  || {};
+  var waterCnt   = Object.values(waterState).filter(Boolean).length;
+  var squatCnt   = Object.values(squatState).filter(Boolean).length;
+  var suppCnt    = Object.values(suppState).filter(Boolean).length;
+  var workoutsDone = Object.entries(existing.workouts||{})
+    .filter(function(e){return e[1];})
+    .map(function(e){ return getTodayWorkouts()[parseInt(e[0])]; })
+    .filter(Boolean).join(', ');
+
   var log = {
     weight:   document.getElementById('log-weight').value,
     km:       document.getElementById('log-km').value,
@@ -690,9 +715,45 @@ function saveLog() {
     workouts: existing.workouts || {}
   };
   lsSet('log_'+dateKey(), log);
-  document.getElementById('log-saved').textContent = '✅ 저장됐어요!';
-  setTimeout(function(){ document.getElementById('log-saved').textContent=''; },2000);
-  // 스탯 업데이트
+  document.getElementById('log-saved').textContent = '✅ 로컬 저장 완료';
+
+  // Google Sheets 동기화
+  var syncEl = document.getElementById('sync-status');
+  if (syncEl) syncEl.innerHTML = '<div class="sync-badge syncing">⏳ Sheets 저장 중...</div>';
+
+  var payload = {
+    date:      dateStr,
+    weight:    log.weight,
+    km:        log.km,
+    min:       log.min,
+    kcal:      log.kcal,
+    workouts:  workoutsDone,
+    water:     waterCnt + '/5',
+    squat:     squatCnt + '/4',
+    supp:      suppCnt  + '/3',
+    note:      log.note
+  };
+
+  try {
+    var res  = await fetch(GAS_URL, {
+      method: 'POST',
+      body:   JSON.stringify(payload)
+    });
+    var data = await res.json();
+    if (data.ok) {
+      if (syncEl) syncEl.innerHTML = '<div class="sync-badge ok">✅ Sheets 저장 완료</div>';
+    } else {
+      throw new Error('응답 오류');
+    }
+  } catch(err) {
+    if (syncEl) syncEl.innerHTML = '<div class="sync-badge err">⚠️ Sheets 저장 실패 (로컬엔 저장됨)</div>';
+    console.warn('Sheets sync error:', err);
+  }
+
+  setTimeout(function(){
+    document.getElementById('log-saved').textContent = '';
+  }, 2500);
+
   initStats();
   renderTrendChart();
 }
