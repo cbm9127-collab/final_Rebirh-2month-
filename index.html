@@ -719,9 +719,25 @@ async function saveLog() {
     workouts: existing.workouts || {}
   };
   lsSet('log_'+dateKey(), log);
+  // 필드 초기화
+  ['log-weight','log-km','log-min','log-kcal','log-note'].forEach(function(id){
+    var el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  // 운동 체크 초기화
+  if (existing.workouts) {
+    var s = lsGet('log_'+dateKey()) || {};
+    s.workouts = {};
+    lsSet('log_'+dateKey(), s);
+    renderWorkoutChecks();
+  }
   document.getElementById('log-saved').textContent = '✅ 로컬 저장 완료';
 
   // Google Sheets 동기화
+  // 중복 방지: 저장 중 버튼 비활성화
+  var saveBtn = document.querySelector('.log-save-btn');
+  if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = '저장 중...'; }
+
   var syncEl = document.getElementById('sync-status');
   if (syncEl) syncEl.innerHTML = '<div class="sync-badge syncing">⏳ Sheets 저장 중...</div>';
 
@@ -751,6 +767,7 @@ async function saveLog() {
     }
   } catch(err) {
     if (syncEl) syncEl.innerHTML = '<div class="sync-badge err">⚠️ Sheets 저장 실패 (로컬엔 저장됨)</div>';
+    if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = '저장하기'; }
     console.warn('Sheets sync error:', err);
   }
 
