@@ -240,8 +240,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
         </div>
         <div class="today-card">
           <div class="tc-time">🌙 저녁</div>
-          <div class="tc-name" id="today-dinner-name">한입쏙 닭가슴살(청양고추)</div>
-          <div class="tc-sub">오트밀 55g + 계란 2개<br>올리브오일 5cc</div>
+          <div class="tc-name" id="today-dinner-name">—</div>
         </div>
       </div>
     </div>
@@ -533,7 +532,8 @@ function initStats() {
 
 // ── 오늘의 루틴 ──────────────────────────────────────────────
 function renderToday() {
-  var dow = new Date().getDay();
+  var now = new Date();
+  var dow = now.getDay();
   var w   = WORKOUTS[dow];
   document.getElementById('tw-morning').textContent = w.morning;
   document.getElementById('tw-evening').textContent = w.evening;
@@ -541,31 +541,40 @@ function renderToday() {
   var lunchEl    = document.getElementById('today-lunch');
   var lunchSub   = document.getElementById('today-lunch-sub');
   var dinnerName = document.getElementById('today-dinner-name');
+  var lunchBase  = '감자 250g · 양배추 250-300g · 올리브오일 5cc';
 
-  // 일요일 = 리피드데이 (점심 변경)
-  if (dow === 0) {
-    lunchEl.textContent  = '🔄 리피드데이 — 돼지목심 250g';
+  // 리피드데이: 6/20까지 일시 중단 → 일요일도 일반 식단
+  var refeedPaused = now <= new Date(2026, 5, 20);
+
+  if (dow === 0 && !refeedPaused) {
+    lunchEl.textContent = '🔄 리피드데이 — 돼지목심 250g';
     if (lunchSub) lunchSub.textContent = '상추 충분히 · 쌈무 5~10장';
-  } else if (dow === 1) {
-    lunchEl.textContent  = '원물 닭가슴살 2팩';
-    if (lunchSub) lunchSub.textContent = '감자 250g · 양배추 150g · 올리브오일 5cc';
+  } else if (dow === 0 || dow === 1) {
+    lunchEl.textContent = '원물 닭가슴살 2팩';
+    if (lunchSub) lunchSub.textContent = lunchBase;
   } else {
-    var idx  = dow-2;
-    var wk   = getChickWeek();
-    var a = wk===0 ? CHICK_A[idx] : CHICK_B[idx];
-    var b = wk===0 ? CHICK_B[idx] : CHICK_A[idx];
-    lunchEl.textContent  = a+' + '+b+' (각 1팩)';
-    if (lunchSub) lunchSub.textContent = '감자 250g · 양배추 150g · 올리브오일 5cc';
+    var idx = dow - 2;
+    var wk  = getChickWeek();
+    var a   = wk===0 ? CHICK_A[idx] : CHICK_B[idx];
+    var b   = wk===0 ? CHICK_B[idx] : CHICK_A[idx];
+    lunchEl.textContent = a + ' + ' + b + ' (각 1팩)';
+    if (lunchSub) lunchSub.textContent = lunchBase;
   }
 
-  // 화/목/토 = 근력운동일 → 단백질쉐이크 안내
-  if (dow === 2 || dow === 4 || dow === 6) {
-    if (dinnerName) dinnerName.innerHTML =
-      '한입쏙 닭가슴살(청양고추) 200g'
-      + '<div style="margin-top:6px;font-size:11px;color:#FF6B35;font-weight:600;">🥤 17:30 단백질쉐이크 1스쿱 → 19:00 덤벨 홈트</div>';
-  } else {
-    if (dinnerName) dinnerName.textContent = '한입쏙 닭가슴살(청양고추) 200g';
-  }
+  // 저녁: 스테이크 소진 기간(6/11~18) vs 이후
+  var today0 = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  var stStart = new Date(2026, 5, 11);
+  var stEnd   = new Date(2026, 5, 18);
+  var inSteakPeriod = (today0 >= stStart && today0 <= stEnd);
+
+  var dinnerContent = inSteakPeriod
+    ? '닭가슴살 스테이크 2개 + 계란 2개<div style="font-size:11px;color:var(--grey);margin-top:4px;">오트밀 20g · 올리브오일 제외</div>'
+    : '동물복지 닭가슴살 200g + 계란 2개<div style="font-size:11px;color:var(--grey);margin-top:4px;">오트밀 35-40g · 올리브오일 제외</div>';
+
+  // 단백질쉐이크: 매일 17:30 (요일 무관)
+  var shakeHtml = '<div style="margin-top:6px;font-size:11px;color:#FF6B35;font-weight:600;">🥤 17:30 단백질쉐이크 1스쿱</div>';
+
+  if (dinnerName) dinnerName.innerHTML = dinnerContent + shakeHtml;
 }
 
 // ── 물 트래커 ─────────────────────────────────────────────────
@@ -654,7 +663,7 @@ function getTodayWorkouts() {
   var items = [];
   if (w.morning && w.morning !== '휴식') items.push(w.morning);
   if (w.evening) items.push(w.evening);
-  if (dow===2||dow===4||dow===6) items.push('단백질쉐이크');
+  items.push('단백질쉐이크 (17:30)'); // 매일
   return items;
 }
 
@@ -806,7 +815,7 @@ function renderLunchRot() {
   // 월: 원물, 일: 리피드
   var fixed = [
     { d:'월', txt:'원물 닭가슴살', sub:'2팩', dow:1 },
-    { d:'일', txt:'🔄 리피드데이', sub:'돼지목심 250g', dow:0 }
+    { d:'일', txt:'원물 닭가슴살', sub:'2팩 (리피드 중단)', dow:0 }
   ];
   fixed.forEach(function(f){
     var div = document.createElement('div');
