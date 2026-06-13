@@ -238,6 +238,11 @@ canvas{display:block;width:100%;}
   <div class="section">
     <div class="sec-label">오늘의 기록</div>
     <div class="log-card">
+      <!-- 날짜 선택 -->
+      <div style="margin-bottom:8px;">
+        <div class="field-lbl">날짜</div>
+        <input class="inp" type="date" id="log-date" style="width:100%;font-size:13px;">
+      </div>
       <!-- 1줄: 체중·걸음수·수면시간·식단준수 -->
       <div class="log-row1">
         <div><div class="field-lbl">체중 (kg)</div><input class="inp" type="number" step="0.1" id="log-weight" placeholder="79.0"></div>
@@ -473,10 +478,10 @@ function renderMeals(){
     lB.innerHTML='<span class="diet-badge out">소스 닭가슴살 소진</span>';
   }
   if(now<=DINNER_END){
-    dE.textContent='닭가슴살 스테이크 2팩 · 오트밀 50g · 계란 2개 · 올리브오일 5cc';
+    dE.textContent='닭가슴살 스테이크 2팩 · 토마토 180g · 오트밀 50g · 계란 2개 · 올리브오일 5cc';
     dB.innerHTML='<span class="diet-badge ok">재고 ~6/18</span>';
   } else {
-    dE.textContent='한입쏙 닭가슴살 100g · 두부 300g · 오트밀 50g · 계란 2개 · 올리브오일 5cc';
+    dE.textContent='한입쏙 닭가슴살 100g · 두부 300g · 토마토 180g · 오트밀 50g · 계란 2개 · 올리브오일 5cc';
     dB.innerHTML='<span class="diet-badge out">스테이크 소진</span>';
   }
 }
@@ -518,10 +523,14 @@ function resetToday(){
   renderWater();renderSupp();
   setDietVal('');
   ['log-weight','log-steps','log-sleep','log-note'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+  var dateEl=document.getElementById('log-date'); if(dateEl) dateEl.value=padDate(new Date());
 }
 
 // ── 오늘의 기록 저장 ──────────────────────────────────────
 function loadLog(){
+  // 날짜 기본값: 오늘
+  var dateEl=document.getElementById('log-date');
+  if(dateEl&&!dateEl.value) dateEl.value=padDate(new Date());
   var log=lsGet('log_'+dateKey());
   if(!log)return;
   if(log.weight)document.getElementById('log-weight').value=log.weight;
@@ -533,7 +542,8 @@ function loadLog(){
 
 async function saveLog(){
   var now=new Date();
-  var ds=padDate(now);
+  var selDate=document.getElementById('log-date').value;
+  var ds=selDate||padDate(now);
   var waterState=lsGet('water_'+dateKey())||{};
   var suppState =lsGet('supp_'+dateKey())||{};
   var actState  =lsGet('act_'+dateKey())||{};
@@ -549,6 +559,7 @@ async function saveLog(){
   var log={weight:document.getElementById('log-weight').value,steps:document.getElementById('log-steps').value,sleep:document.getElementById('log-sleep').value,diet:diet,note:document.getElementById('log-note').value};
   lsSet('log_'+dateKey(),log);
   ['log-weight','log-steps','log-sleep','log-note'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+  var dateEl=document.getElementById('log-date'); if(dateEl) dateEl.value=padDate(new Date());
   setDietVal('');
   document.getElementById('log-msg').textContent='✅ 저장 완료';
   calcWeeklyStats();
