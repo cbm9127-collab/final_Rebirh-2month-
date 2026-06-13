@@ -5,79 +5,80 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Re:birth — 기록 히스토리</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
-  --black:#0A0A0A; --card:#181818; --card2:#1E1E1E;
-  --border:rgba(255,255,255,0.08); --border2:rgba(255,255,255,0.13);
-  --green:#00D97E; --green2:#00A85A; --green-bg:rgba(0,217,126,0.08);
-  --white:#F5F5F0; --grey:#888; --grey2:#444;
-  --orange:#FF6B35; --orange-bg:rgba(255,107,53,0.1);
-  --radius:14px; --radius-s:10px;
+  --bg:#0D1421; --card:#162032; --card2:#1A2845;
+  --border:rgba(56,189,248,0.14); --border2:rgba(56,189,248,0.25);
+  --blue:#38BDF8; --blue2:#0EA5E9; --blue3:#1D4ED8;
+  --blue-dim:rgba(56,189,248,0.08);
+  --white:#F0F9FF; --grey:#6B7FA8; --grey2:#3B4F6B;
+  --green:#34D399; --red:#F87171; --amber:#FBBF24;
+  --r:12px; --rs:9px;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-body{background:var(--black);color:var(--white);font-family:'Noto Sans KR',sans-serif;min-height:100vh;padding-bottom:60px;}
+body{background:var(--bg);color:var(--white);font-family:'Noto Sans KR',sans-serif;min-height:100vh;padding-bottom:60px;}
 
-/* ── 헤더 ── */
-.header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(10,10,10,.92);backdrop-filter:blur(10px);z-index:50;max-width:100%;}
-.back-btn{background:none;border:1px solid var(--border2);border-radius:8px;color:var(--grey);font-size:12px;padding:6px 12px;cursor:pointer;font-family:inherit;text-decoration:none;display:inline-flex;align-items:center;gap:5px;}
-.back-btn:hover{color:var(--white);border-color:var(--green);}
-.header-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:var(--green);}
+/* 헤더 */
+.header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(13,20,33,.92);backdrop-filter:blur(10px);z-index:50;}
+.back-btn{background:none;border:1px solid var(--border2);border-radius:8px;color:var(--grey);font-size:12px;padding:6px 12px;text-decoration:none;display:inline-flex;align-items:center;gap:5px;}
+.back-btn:hover{color:var(--white);border-color:var(--blue);}
+.header-title{font-size:16px;font-weight:800;color:var(--blue);}
 
-/* ── 요약 통계 ── */
-.summary{padding:20px;max-width:720px;margin:0 auto;}
-.sum-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:20px;}
-.sum-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-s);padding:14px 10px;text-align:center;}
-.sum-num{font-size:22px;font-weight:800;color:var(--green);line-height:1;}
+/* 레이아웃 */
+.wrap{max-width:680px;margin:0 auto;padding:0 18px;}
+.section{margin:18px 0;}
+.sec-label{font-size:10px;letter-spacing:2.5px;font-weight:700;color:var(--blue);text-transform:uppercase;margin-bottom:10px;}
+
+/* 전체 요약 */
+.sum-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px;}
+.sum-card{background:var(--card);border:1px solid var(--border);border-radius:var(--rs);padding:13px 10px;text-align:center;}
+.sum-num{font-size:20px;font-weight:800;color:var(--blue);line-height:1;}
 .sum-lbl{font-size:10px;color:var(--grey);margin-top:4px;}
 
-/* ── 필터 ── */
-.filter-row{display:flex;gap:8px;align-items:center;margin-bottom:16px;flex-wrap:wrap;}
-.filter-inp{background:var(--card);border:1px solid var(--border2);border-radius:8px;color:var(--white);font-size:12px;padding:7px 12px;outline:none;font-family:inherit;width:130px;}
-.filter-inp:focus{border-color:var(--green);}
-.filter-btn{background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--grey);font-size:11px;font-weight:600;padding:7px 12px;cursor:pointer;font-family:inherit;transition:all .15s;}
-.filter-btn.active{background:var(--green-bg);border-color:var(--green);color:var(--green);}
+/* 주간 테이블 */
+.week-table{width:100%;border-collapse:collapse;font-size:12px;}
+.week-table th{background:var(--card2);color:var(--grey);font-weight:600;padding:8px 10px;text-align:center;border-bottom:1px solid var(--border);}
+.week-table td{padding:8px 10px;text-align:center;border-bottom:1px solid var(--border);color:var(--white);}
+.week-table tr:last-child td{border-bottom:none;}
+.week-table tr:hover td{background:var(--blue-dim);}
+.wk-period{font-weight:700;color:var(--blue);text-align:left!important;}
+.wk-cur{background:var(--blue-dim);}
+
+/* 필터 */
+.filter-row{display:flex;gap:8px;align-items:center;margin-bottom:14px;}
+.filter-inp{background:var(--card);border:1px solid var(--border2);border-radius:8px;color:var(--white);font-size:12px;padding:6px 11px;outline:none;font-family:inherit;width:120px;}
+.filter-inp:focus{border-color:var(--blue);}
 .result-count{font-size:11px;color:var(--grey);margin-left:auto;}
 
-/* ── 기록 리스트 ── */
-.wrap{max-width:720px;margin:0 auto;padding:0 20px;}
-.record-list{display:flex;flex-direction:column;gap:10px;}
-
-.rec-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;transition:border-color .15s;}
-.rec-card:hover{border-color:var(--border2);}
-.rec-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
-.rec-date{font-size:14px;font-weight:700;}
-.rec-dow{font-size:11px;color:var(--grey);margin-top:1px;}
-.rec-weight{font-size:22px;font-weight:800;color:var(--green);line-height:1;}
-.rec-weight-diff{font-size:11px;margin-top:2px;font-weight:600;}
+/* 데일리 카드 */
+.rec-list{display:flex;flex-direction:column;gap:8px;}
+.rec-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;}
+.rec-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.rec-date{font-size:13px;font-weight:700;}
+.rec-dow{font-size:10px;color:var(--grey);margin-top:2px;}
+.rec-weight{font-size:20px;font-weight:800;color:var(--blue);line-height:1;}
+.rec-wdiff{font-size:11px;margin-top:2px;font-weight:600;}
 .diff-down{color:var(--green);}
-.diff-up{color:var(--orange);}
-.diff-same{color:var(--grey);}
-
-/* 메트릭 */
-.rec-metrics{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;}
-.rec-metric{background:var(--card2);border-radius:7px;padding:6px 10px;font-size:11px;font-weight:600;color:var(--grey);display:flex;align-items:center;gap:4px;}
+.diff-up{color:var(--red);}
+.rec-metrics{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;}
+.rec-metric{background:var(--card2);border-radius:6px;padding:5px 9px;font-size:11px;font-weight:600;color:var(--grey);}
 .rec-metric span{color:var(--white);}
+.rec-metric.walk{border-left:2px solid var(--blue);}
+.rec-metric.act{border-left:2px solid var(--green);}
 .rec-metric.run{border-left:2px solid var(--green);}
-.rec-metric.workout{border-left:2px solid var(--orange);}
+.rec-note{font-size:11px;color:var(--grey);background:rgba(255,255,255,0.03);border-radius:6px;padding:7px 9px;line-height:1.6;font-style:italic;}
 
-
-
-/* 메모 */
-.rec-note{font-size:12px;color:var(--grey);background:rgba(255,255,255,0.03);border-radius:7px;padding:8px 10px;line-height:1.6;font-style:italic;border-left:2px solid var(--border2);}
-
-/* 로딩·에러·빈상태 */
-.state-box{text-align:center;padding:60px 20px;}
-.state-icon{font-size:40px;margin-bottom:10px;}
-.state-title{font-size:15px;font-weight:700;color:var(--grey);margin-bottom:6px;}
-.state-sub{font-size:12px;color:var(--grey2);}
-.spinner{width:28px;height:28px;border:2.5px solid var(--border2);border-top-color:var(--green);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 12px;}
+/* 상태 */
+.state-box{text-align:center;padding:50px 20px;}
+.spinner{width:26px;height:26px;border:2.5px solid var(--border2);border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 10px;}
 @keyframes spin{to{transform:rotate(360deg);}}
+.state-title{font-size:14px;font-weight:700;color:var(--grey);}
 
-@media(max-width:540px){
+@media(max-width:480px){
   .sum-grid{grid-template-columns:repeat(2,1fr);}
-  .rec-weight{font-size:18px;}
-  .header-title{font-size:18px;}
+  .week-table{font-size:11px;}
+  .week-table th,.week-table td{padding:6px 6px;}
 }
 </style>
 </head>
@@ -89,36 +90,68 @@ body{background:var(--black);color:var(--white);font-family:'Noto Sans KR',sans-
   <div style="width:80px;"></div>
 </div>
 
-<div class="summary">
-  <!-- 요약 통계 -->
-  <div class="sum-grid">
-    <div class="sum-card"><div class="sum-num" id="s-days">—</div><div class="sum-lbl">기록 일수</div></div>
-    <div class="sum-card"><div class="sum-num" id="s-km">—</div><div class="sum-lbl">총 러닝 km</div></div>
-    <div class="sum-card"><div class="sum-num" id="s-avg-pace">—</div><div class="sum-lbl">평균 페이스</div></div>
-    <div class="sum-card"><div class="sum-num" id="s-weight-diff">—</div><div class="sum-lbl">기간 체중 변화</div></div>
-  </div>
-
-  <!-- 필터 -->
-  <div class="filter-row">
-    <input class="filter-inp" type="month" id="filter-month" placeholder="년-월">
-    <div class="result-count" id="result-count"></div>
-  </div>
-</div>
-
 <div class="wrap">
-  <div id="record-list">
-    <div class="state-box">
-      <div class="spinner"></div>
-      <div class="state-title">기록을 불러오는 중...</div>
+
+  <!-- 전체 요약 -->
+  <div class="section">
+    <div class="sum-grid">
+      <div class="sum-card"><div class="sum-num" id="s-days">—</div><div class="sum-lbl">기록 일수</div></div>
+      <div class="sum-card"><div class="sum-num" id="s-avg-steps">—</div><div class="sum-lbl">평균 걸음수</div></div>
+      <div class="sum-card"><div class="sum-num" id="s-weight-diff">—</div><div class="sum-lbl">기간 체중 변화</div></div>
     </div>
   </div>
+
+  <!-- 주간 평균 (화~월) -->
+  <div class="section">
+    <div class="sec-label">주간 평균 (화~월)</div>
+    <div id="weekly-table-wrap">
+      <div class="state-box"><div class="spinner"></div><div class="state-title">불러오는 중...</div></div>
+    </div>
+  </div>
+
+  <!-- 일별 기록 -->
+  <div class="section">
+    <div class="sec-label">일별 기록</div>
+    <div class="filter-row">
+      <input class="filter-inp" type="month" id="filter-month" placeholder="년-월">
+      <div class="result-count" id="result-count"></div>
+    </div>
+    <div class="rec-list" id="record-list">
+      <div class="state-box"><div class="spinner"></div><div class="state-title">불러오는 중...</div></div>
+    </div>
+  </div>
+
 </div>
 
 <script>
 var GAS_URL = 'https://script.google.com/macros/s/AKfycbysLmM_fov67_179-Td84CI8v5ZNW1aKSotd1eAFFhZkAX4mDuqGmZdX8F2C30Ed63kMQ/exec';
 var DOW_KR  = ['일','월','화','수','목','금','토'];
 var allData = [];
-var curFilter = 'all';
+
+// ── helpers ──────────────────────────────────────────────────
+function parseDate(raw) {
+  var s = String(raw).slice(0,10);
+  var p = s.split('-');
+  return new Date(+p[0], +p[1]-1, +p[2]);
+}
+
+function fmtDate(d) {
+  return (d.getMonth()+1)+'월 '+d.getDate()+'일';
+}
+
+// 해당 날짜가 속하는 주의 화요일 반환 (화~월 기준)
+function getWeekTue(date) {
+  var d = new Date(date); d.setHours(0,0,0,0);
+  var dow = d.getDay();
+  var diff = dow >= 2 ? dow - 2 : 7 + dow - 2;
+  d.setDate(d.getDate() - diff);
+  return d;
+}
+
+function avg(arr) {
+  if (!arr.length) return null;
+  return +(arr.reduce(function(s,v){return s+v;},0)/arr.length).toFixed(1);
+}
 
 // ── 데이터 로드 ───────────────────────────────────────────────
 async function loadData() {
@@ -126,170 +159,186 @@ async function loadData() {
     var res  = await fetch(GAS_URL);
     var rows = await res.json();
 
-    // 날짜 파싱 + 최신순 정렬
+    // 주간기록 제외, 날짜 필터
     allData = rows
-      .filter(function(r){ return r['날짜']; })
+      .filter(function(r){
+        var d = String(r['날짜']||'');
+        return d && !d.startsWith('주간');
+      })
       .map(function(r){
-        var rawDate = String(r['날짜']).slice(0,10); // 'YYYY-MM-DD' 만 추출
-    var parts = rawDate.split('-');
-    var d = new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
+        var d = parseDate(r['날짜']);
         return {
-          date:    r['날짜'],
-          dateObj: d,
-          dow:     DOW_KR[d.getDay()],
-          weight:  parseFloat(r['체중'])   || null,
-          km:      parseFloat(r['러닝km']) || null,
-          min:     parseInt(r['시간min'])  || null,
-          kcal:    parseInt(r['칼로리'])   || null,
-          workout: r['운동완료'] || '',
-          water:   r['물']      || '',
-          squat:   r['스쿼트']  || '',
-          supp:    r['영양제']  || '',
-          note:    r['메모']    || ''
+          date:     String(r['날짜']).slice(0,10),
+          dateObj:  d,
+          dow:      DOW_KR[d.getDay()],
+          weight:   parseFloat(r['체중'])    || null,
+          steps:    parseInt(r['걸음수'])    || null,
+          sleep:    parseFloat(r['수면시간'])|| null,
+          water:    r['수분']    || r['물']  || '',
+          supp:     r['영양제']  || '',
+          diet:     r['식단준수']|| '',
+          walk_am:  r['아침산책']|| '',
+          walk_noon:r['점심산책']|| '',
+          walk_pm:  r['저녁산책']|| '',
+          core:     r['복근루틴']|| '',
+          phase:    r['단계']    || '',
+          // 훈련기 컬럼 (하위호환)
+          km:       parseFloat(r['러닝km'])  || null,
+          min:      parseInt(r['시간min'])   || null,
+          note:     r['메모']    || ''
         };
       })
       .sort(function(a,b){ return b.dateObj - a.dateObj; });
 
-    // 같은 날짜 중복 제거 → 가장 마지막에 기록된 것(배열 앞쪽) 유지
+    // 날짜 중복 제거
     var seen = {};
     allData = allData.filter(function(r){
-      var key = r.dateObj.getFullYear()+'-'+(r.dateObj.getMonth()+1)+'-'+r.dateObj.getDate();
-      if (seen[key]) return false;
-      seen[key] = true;
-      return true;
+      if (seen[r.date]) return false;
+      seen[r.date] = true; return true;
     });
 
     renderSummary();
+    renderWeeklyTable();
     renderList();
   } catch(e) {
     document.getElementById('record-list').innerHTML =
-      '<div class="state-box"><div class="state-icon">⚠️</div>'
-      +'<div class="state-title">데이터를 불러오지 못했어요</div>'
-      +'<div class="state-sub">'+e.message+'</div></div>';
+      '<div class="state-box"><div class="state-title">⚠️ 데이터 로드 실패: '+e.message+'</div></div>';
+    document.getElementById('weekly-table-wrap').innerHTML = '';
   }
 }
 
-// ── 요약 통계 ─────────────────────────────────────────────────
+// ── 전체 요약 ─────────────────────────────────────────────────
 function renderSummary() {
   document.getElementById('s-days').textContent = allData.length;
 
-  var totalKm = allData.reduce(function(s,r){ return s+(r.km||0); }, 0);
-  document.getElementById('s-km').textContent = totalKm.toFixed(1);
+  var stepRows = allData.filter(function(r){ return r.steps; });
+  var avgSteps = stepRows.length ? Math.round(stepRows.reduce(function(s,r){return s+r.steps;},0)/stepRows.length) : null;
+  document.getElementById('s-avg-steps').textContent = avgSteps ? avgSteps.toLocaleString() : '—';
 
-  // 평균 페이스
-  var runRows = allData.filter(function(r){ return r.km && r.min; });
-  if (runRows.length) {
-    var avgPace = runRows.reduce(function(s,r){ return s + r.min/r.km; }, 0) / runRows.length;
-    var m = Math.floor(avgPace), sec = Math.round((avgPace-m)*60);
-    document.getElementById('s-avg-pace').textContent = m+"'"+String(sec).padStart(2,'0')+'"';
-  }
-
-  // 체중 변화 (최초 vs 최신)
   var wRows = allData.filter(function(r){ return r.weight; });
   if (wRows.length >= 2) {
-    var first = wRows[wRows.length-1].weight;
-    var last  = wRows[0].weight;
-    var diff  = (last - first).toFixed(1);
-    var el    = document.getElementById('s-weight-diff');
+    var diff = (wRows[0].weight - wRows[wRows.length-1].weight).toFixed(1);
+    var el = document.getElementById('s-weight-diff');
     el.textContent = (diff > 0 ? '+' : '') + diff + 'kg';
-    el.style.color  = diff < 0 ? '#00D97E' : diff > 0 ? '#FF6B35' : '#888';
+    el.style.color = diff < 0 ? '#34D399' : diff > 0 ? '#F87171' : '#6B7FA8';
   }
 }
 
-// ── 페이스 계산 ───────────────────────────────────────────────
-function pace(km, min) {
-  if (!km || !min) return null;
-  var p = min/km, m = Math.floor(p), s = Math.round((p-m)*60);
-  return m+"'"+String(s).padStart(2,'0')+'"';
+// ── 주간 평균 테이블 (화~월) ──────────────────────────────────
+function renderWeeklyTable() {
+  // 주차별 그룹핑
+  var weeks = {};
+  allData.forEach(function(r) {
+    var tue = getWeekTue(r.dateObj);
+    var key = tue.getFullYear()+'-'+(tue.getMonth()+1)+'-'+tue.getDate();
+    if (!weeks[key]) weeks[key] = {tue:tue, rows:[]};
+    weeks[key].rows.push(r);
+  });
+
+  var keys = Object.keys(weeks).sort(function(a,b){ return b > a ? 1 : -1; });
+  if (!keys.length) {
+    document.getElementById('weekly-table-wrap').innerHTML =
+      '<div style="font-size:12px;color:var(--grey);padding:10px 0;">기록이 없어요.</div>';
+    return;
+  }
+
+  var nowTue = getWeekTue(new Date());
+  var nowKey = nowTue.getFullYear()+'-'+(nowTue.getMonth()+1)+'-'+nowTue.getDate();
+
+  var thead = '<tr>'
+    + '<th style="text-align:left;">기간</th>'
+    + '<th>평균<br>체중</th>'
+    + '<th>평균<br>걸음수</th>'
+    + '<th>평균<br>수면</th>'
+    + '<th>식단<br>준수</th>'
+    + '</tr>';
+
+  var tbody = keys.map(function(key) {
+    var w = weeks[key];
+    var mon = new Date(w.tue); mon.setDate(w.tue.getDate() + 6);
+    var period = (w.tue.getMonth()+1)+'/'+w.tue.getDate()
+      + ' ~ ' + (mon.getMonth()+1)+'/'+mon.getDate();
+
+    var weights = w.rows.filter(function(r){return r.weight;}).map(function(r){return r.weight;});
+    var steps   = w.rows.filter(function(r){return r.steps;}).map(function(r){return r.steps;});
+    var sleeps  = w.rows.filter(function(r){return r.sleep;}).map(function(r){return r.sleep;});
+    var dietDays= w.rows.filter(function(r){return r.diet==='✅';}).length;
+
+    var avgW  = avg(weights);
+    var avgS  = steps.length  ? Math.round(steps.reduce(function(s,v){return s+v;},0)/steps.length) : null;
+    var avgSl = avg(sleeps);
+    var isCur = key === nowKey;
+
+    return '<tr class="'+(isCur?'wk-cur':'')+'">'
+      + '<td class="wk-period">'+period+'</td>'
+      + '<td>'+(avgW  ? avgW+'kg' : '—')+'</td>'
+      + '<td>'+(avgS  ? avgS.toLocaleString() : '—')+'</td>'
+      + '<td>'+(avgSl ? avgSl+'h' : '—')+'</td>'
+      + '<td>'+dietDays+'/'+w.rows.length+'일</td>'
+      + '</tr>';
+  }).join('');
+
+  document.getElementById('weekly-table-wrap').innerHTML =
+    '<table class="week-table"><thead>'+thead+'</thead><tbody>'+tbody+'</tbody></table>';
 }
 
-// ── 날짜 포맷 ─────────────────────────────────────────────────
-function fmtDate(r) {
-  var d = r.dateObj;
-  return d.getFullYear()+'년 '+(d.getMonth()+1)+'월 '+d.getDate()+'일';
-}
-
-// ── 카드 렌더 ─────────────────────────────────────────────────
+// ── 일별 카드 ─────────────────────────────────────────────────
 function renderCard(r, prevWeight) {
+  // 체중 diff
   var diffHtml = '';
   if (r.weight && prevWeight) {
     var d = (r.weight - prevWeight).toFixed(1);
-    var cls = d < 0 ? 'diff-down' : d > 0 ? 'diff-up' : 'diff-same';
-    diffHtml = '<div class="rec-weight-diff '+cls+'">'+(d>0?'+':'')+d+'kg</div>';
+    var cls = d < 0 ? 'diff-down' : d > 0 ? 'diff-up' : '';
+    diffHtml = '<div class="rec-wdiff '+cls+'">'+(d>0?'+':'')+d+'kg</div>';
   }
 
+  // 메트릭 뱃지
   var metrics = '';
-  if (r.km || r.min) {
-    var p = pace(r.km, r.min);
-    metrics += '<div class="rec-metric run">'
-      + (r.km ? '<span>'+r.km+'km</span>' : '')
-      + (r.min ? ' · <span>'+r.min+'분</span>' : '')
-      + (p ? ' · <span>'+p+'/km</span>' : '')
-      + (r.kcal ? ' · <span>'+r.kcal+'kcal</span>' : '')
-      + '</div>';
-  }
-  if (r.workout) {
-    metrics += '<div class="rec-metric workout">💪 <span>'+r.workout+'</span></div>';
-  }
-
-  var badges = '';
-
-  var noteHtml = r.note ? '<div class="rec-note">'+r.note+'</div>' : '';
+  // 회복기 데이터
+  if (r.steps)  metrics += '<div class="rec-metric walk">👟 <span>'+r.steps.toLocaleString()+'보</span></div>';
+  if (r.sleep)  metrics += '<div class="rec-metric walk">😴 <span>'+r.sleep+'h</span></div>';
+  var walks = [r.walk_am?'아침':'', r.walk_noon?'점심':'', r.walk_pm?'저녁':''].filter(Boolean);
+  if (walks.length) metrics += '<div class="rec-metric act">🚶 <span>'+walks.join('·')+'</span></div>';
+  if (r.core==='✅') metrics += '<div class="rec-metric act">💪 <span>복근 완료</span></div>';
+  // 훈련기 데이터 (하위호환)
+  if (r.km) metrics += '<div class="rec-metric run">🏃 <span>'+r.km+'km</span></div>';
 
   return '<div class="rec-card">'
     + '<div class="rec-head">'
-    +   '<div><div class="rec-date">'+fmtDate(r)+'</div>'
-    +   '<div class="rec-dow">'+r.dow+'요일</div></div>'
-    +   (r.weight ? '<div style="text-align:right"><div class="rec-weight">'+r.weight+'<span style="font-size:13px;font-weight:500;color:var(--grey);">kg</span></div>'+diffHtml+'</div>' : '')
+    +   '<div><div class="rec-date">'+fmtDate(r.dateObj)+' '+r.dow+'</div>'
+    +   (r.phase ? '<div style="font-size:10px;color:var(--grey);margin-top:2px;">'+r.phase+'</div>' : '')
+    +   '</div>'
+    +   (r.weight ? '<div style="text-align:right"><div class="rec-weight">'+r.weight+'<span style="font-size:12px;color:var(--grey);">kg</span></div>'+diffHtml+'</div>' : '')
     + '</div>'
     + (metrics ? '<div class="rec-metrics">'+metrics+'</div>' : '')
-
-    + noteHtml
+    + (r.note   ? '<div class="rec-note">'+r.note+'</div>' : '')
     + '</div>';
 }
 
-// ── 필터 + 리스트 렌더 ───────────────────────────────────────
-var curMonth = '';
-function setFilter(type, btn) {
-  curFilter = type;
-  document.querySelectorAll('.filter-btn').forEach(function(b){ b.classList.remove('active'); });
-  btn.classList.add('active');
-  renderList();
-}
-
+// ── 일별 리스트 ───────────────────────────────────────────────
 function renderList() {
-  var month = document.getElementById('filter-month').value; // 'YYYY-MM' or ''
+  var month = document.getElementById('filter-month').value;
   var filtered = allData.filter(function(r){
-    if (month && r.date.slice(0,7) !== month) return false;
-    if (curFilter === 'run'  && !r.km) return false;
-    if (curFilter === 'note' && !r.note) return false;
-    return true;
+    return !month || r.date.slice(0,7) === month;
   });
 
   document.getElementById('result-count').textContent = filtered.length + '개';
 
-  if (filtered.length === 0) {
+  if (!filtered.length) {
     document.getElementById('record-list').innerHTML =
-      '<div class="state-box"><div class="state-icon">📭</div>'
-      +'<div class="state-title">해당하는 기록이 없어요</div></div>';
+      '<div class="state-box"><div class="state-title">📭 해당하는 기록이 없어요</div></div>';
     return;
   }
 
-  // 체중 비교를 위해 이전 기록의 체중 추적
   var wMap = {};
-  allData.filter(function(r){ return r.weight; })
-    .forEach(function(r, i, arr){
-      if (i+1 < arr.length) wMap[r.date] = arr[i+1].weight;
-    });
+  allData.filter(function(r){return r.weight;})
+    .forEach(function(r,i,arr){ if(i+1<arr.length) wMap[r.date]=arr[i+1].weight; });
 
   document.getElementById('record-list').innerHTML =
     filtered.map(function(r){ return renderCard(r, wMap[r.date]); }).join('');
 }
 
-// ── 월 필터 ──────────────────────────────────────────────────
 document.getElementById('filter-month').addEventListener('change', renderList);
-
-// ── 초기화 ───────────────────────────────────────────────────
 loadData();
 </script>
 </body>
