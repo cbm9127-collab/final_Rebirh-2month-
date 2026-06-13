@@ -616,7 +616,7 @@ function calcWeeklyStats(){
     // Sheets 데이터 우선
     var sheetsRow=sheetsData.find(function(r){
       var rk=r.dateObj.getFullYear()+'-'+(r.dateObj.getMonth()+1)+'-'+r.dateObj.getDate();
-      return rk===k;
+      return rk===k; // k: dateKey(d) 동일 형식
     });
     var log=sheetsRow||lsGet('log_'+k);
     if(!log)return;
@@ -668,6 +668,13 @@ async function loadFromSheets(){
         return{dateObj:new Date(+pts[0],+pts[1]-1,+pts[2]),weight:parseFloat(r['체중'])||null,steps:parseInt(r['걸음수'])||null,sleep:parseFloat(r['수면시간'])||null,diet:r['식단준수']||''};
       }).filter(function(r){return r.weight||r.steps||r.sleep;})
       .sort(function(a,b){return a.dateObj-b.dateObj;});
+    // 날짜 중복 제거 (마지막 저장값 유지)
+    var _dd={};
+    sheetsData.forEach(function(r){
+      var k=r.dateObj.getFullYear()+'-'+(r.dateObj.getMonth()+1)+'-'+r.dateObj.getDate();
+      _dd[k]=r;
+    });
+    sheetsData=Object.values(_dd).sort(function(a,b){return a.dateObj-b.dateObj;});
     // 오늘 기록 미리 채우기
     var todayStr=padDate(new Date());
     var todayRow=rows.find(function(r){return String(r['날짜']).slice(0,10)===todayStr;});
