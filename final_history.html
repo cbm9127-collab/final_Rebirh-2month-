@@ -8,112 +8,168 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#0D1421; --card:#162032; --card2:#1A2845;
-  --border:rgba(56,189,248,0.14); --border2:rgba(56,189,248,0.25);
-  --blue:#38BDF8; --blue2:#0EA5E9; --blue3:#1D4ED8;
-  --blue-dim:rgba(56,189,248,0.08);
-  --white:#F0F9FF; --grey:#6B7FA8; --grey2:#3B4F6B;
-  --green:#34D399; --red:#F87171; --amber:#FBBF24;
+  --bg:#FFFCF2; --card:#FFFFFF; --card2:#FFF8E1;
+  --border:rgba(245,158,11,0.20); --border2:rgba(245,158,11,0.40);
+  --blue:#F59E0B; --blue2:#FBBF24; --blue3:#D97706;
+  --blue-dim:rgba(251,191,36,0.14);
+  --white:#3A3526; --grey:#8A8265; --grey2:#B8AE8C;
+  --green:#16A34A; --red:#DC2626; --amber:#D97706;
   --r:12px; --rs:9px;
+  --shadow:0 1px 3px rgba(180,150,60,0.10);
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 body{background:var(--bg);color:var(--white);font-family:'Noto Sans KR',sans-serif;min-height:100vh;padding-bottom:60px;}
 
-/* 헤더 */
-.header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(13,20,33,.92);backdrop-filter:blur(10px);z-index:50;}
-.back-btn{background:none;border:1px solid var(--border2);border-radius:8px;color:var(--grey);font-size:12px;padding:6px 12px;text-decoration:none;display:inline-flex;align-items:center;gap:5px;}
+.header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(255,252,242,.92);backdrop-filter:blur(10px);z-index:50;}
+.back-btn{background:#fff;border:1px solid var(--border2);border-radius:8px;color:var(--grey);font-size:12px;padding:6px 12px;text-decoration:none;display:inline-flex;align-items:center;gap:5px;}
 .back-btn:hover{color:var(--white);border-color:var(--blue);}
-.header-title{font-size:16px;font-weight:800;color:var(--blue);}
+.header-title{font-size:16px;font-weight:800;color:var(--blue3);letter-spacing:1px;}
 
-/* 레이아웃 */
 .wrap{max-width:680px;margin:0 auto;padding:0 18px;}
 .section{margin:18px 0;}
-.sec-label{font-size:10px;letter-spacing:2.5px;font-weight:700;color:var(--blue);text-transform:uppercase;margin-bottom:10px;}
+.sec-label{font-size:10px;letter-spacing:2.5px;font-weight:700;color:var(--blue3);text-transform:uppercase;margin-bottom:10px;}
 
-/* 전체 요약 */
-.sum-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px;}
-.sum-card{background:var(--card);border:1px solid var(--border);border-radius:var(--rs);padding:13px 10px;text-align:center;}
-.sum-num{font-size:20px;font-weight:800;color:var(--blue);line-height:1;}
+/* 요약 카드 */
+.sum-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:8px;}
+.sum-card{background:var(--card2);border-radius:var(--rs);padding:12px 10px;text-align:center;}
+.sum-card.plain{background:var(--card);border:1px solid var(--border);box-shadow:var(--shadow);}
+.sum-num{font-size:19px;font-weight:800;color:var(--blue3);line-height:1.1;}
+.sum-num small{font-size:11px;font-weight:700;}
+.sum-num.dk{color:var(--white);}
+.sum-num.up{color:var(--red);}.sum-num.down{color:var(--green);}
 .sum-lbl{font-size:10px;color:var(--grey);margin-top:4px;}
 
 /* 주간 테이블 */
+.week-table-wrap{background:var(--card);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden;}
 .week-table{width:100%;border-collapse:collapse;font-size:12px;}
-.week-table th{background:var(--card2);color:var(--grey);font-weight:600;padding:8px 10px;text-align:center;border-bottom:1px solid var(--border);}
-.week-table td{padding:8px 10px;text-align:center;border-bottom:1px solid var(--border);color:var(--white);}
-.week-table tr:last-child td{border-bottom:none;}
+.week-table th{background:var(--card2);color:var(--grey);font-weight:600;padding:8px 8px;text-align:center;}
+.week-table th:first-child{text-align:left;}
+.week-table td{padding:8px 8px;text-align:center;border-top:1px solid var(--border);color:var(--white);}
 .week-table tr:hover td{background:var(--blue-dim);}
-.wk-period{font-weight:700;color:var(--blue);text-align:left!important;}
-.wk-cur{background:var(--blue-dim);}
+.wk-period{font-weight:700;color:var(--blue3);text-align:left!important;white-space:nowrap;}
+.wk-cur td{background:#FFFBEB;}
+
+/* 수분·영양제 달성 */
+.ach-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.ach-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px;box-shadow:var(--shadow);}
+.ach-head{display:flex;align-items:center;gap:7px;margin-bottom:6px;font-size:13px;font-weight:700;}
+.ach-head i{color:var(--blue3);font-style:normal;}
+.ach-val{font-size:24px;font-weight:800;color:var(--blue3);line-height:1;}
+.ach-val span{font-size:12px;color:var(--grey);font-weight:600;}
 
 /* 필터 */
-.filter-row{display:flex;gap:8px;align-items:center;margin-bottom:14px;}
-.filter-inp{background:var(--card);border:1px solid var(--border2);border-radius:8px;color:var(--white);font-size:12px;padding:6px 11px;outline:none;font-family:inherit;width:120px;}
+.filter-row{display:flex;gap:8px;align-items:center;margin-bottom:12px;}
+.filter-inp{background:var(--card);border:1px solid var(--border2);border-radius:8px;color:var(--white);font-size:12px;padding:6px 11px;outline:none;font-family:inherit;}
 .filter-inp:focus{border-color:var(--blue);}
 .result-count{font-size:11px;color:var(--grey);margin-left:auto;}
 
-/* 데일리 카드 */
+/* 주간 운동 카드 */
+.wo-week{background:var(--card);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow);padding:14px 16px;margin-bottom:10px;}
+.wo-week-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.wo-week-period{font-size:14px;font-weight:800;color:var(--blue3);}
+.wo-week-stat{font-size:11px;color:var(--green);font-weight:700;}
+.wo-day{margin-bottom:10px;}
+.wo-day:last-child{margin-bottom:0;}
+.wo-day-date{font-size:12px;font-weight:700;color:var(--white);margin-bottom:6px;display:flex;align-items:center;gap:6px;}
+.wo-day-date .dow{font-size:10px;color:var(--grey);font-weight:500;}
+.ex-block{background:var(--card2);border-radius:var(--rs);padding:9px 11px;margin-bottom:6px;}
+.ex-block:last-child{margin-bottom:0;}
+.ex-block.skip{opacity:.55;}
+.ex-line1{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
+.ex-nm{font-size:13px;font-weight:700;color:var(--white);}
+.ex-var{font-size:10px;color:var(--grey);font-weight:500;margin-left:5px;}
+.ex-done{font-size:11px;color:var(--green);font-weight:700;}
+.ex-todo{font-size:11px;color:var(--grey2);font-weight:700;}
+.ex-sets{font-size:12px;color:var(--white);line-height:1.6;}
+.ex-memo{font-size:11px;color:var(--grey);margin-top:4px;font-style:italic;line-height:1.6;}
+
+/* 일별 카드 */
 .rec-list{display:flex;flex-direction:column;gap:8px;}
-.rec-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;}
+.rec-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow);padding:14px 16px;}
 .rec-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
 .rec-date{font-size:13px;font-weight:700;}
-.rec-dow{font-size:10px;color:var(--grey);margin-top:2px;}
-.rec-weight{font-size:20px;font-weight:800;color:var(--blue);line-height:1;}
-.rec-wdiff{font-size:11px;margin-top:2px;font-weight:600;}
-.diff-down{color:var(--green);}
-.diff-up{color:var(--red);}
-.rec-metrics{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;}
+.rec-phase{font-size:10px;color:var(--grey);margin-top:2px;}
+.rec-metrics{display:flex;gap:6px;flex-wrap:wrap;}
 .rec-metric{background:var(--card2);border-radius:6px;padding:5px 9px;font-size:11px;font-weight:600;color:var(--grey);}
-.rec-metric span{color:var(--white);}
-.rec-metric.walk{border-left:2px solid var(--blue);}
-.rec-metric.act{border-left:2px solid var(--green);}
-.rec-metric.run{border-left:2px solid var(--green);}
-.rec-note{font-size:11px;color:var(--grey);background:rgba(255,255,255,0.03);border-radius:6px;padding:7px 9px;line-height:1.6;font-style:italic;}
+.rec-metric span{color:var(--white);font-weight:700;}
+.rec-metric.ok{border-left:2px solid var(--green);}
+.rec-metric.no{border-left:2px solid var(--red);}
+.rec-metric.act{border-left:2px solid var(--blue);}
+.rec-note{font-size:11px;color:var(--grey);background:var(--card2);border-radius:6px;padding:7px 9px;line-height:1.6;font-style:italic;margin-top:8px;}
 
 /* 상태 */
-.state-box{text-align:center;padding:50px 20px;}
-.spinner{width:26px;height:26px;border:2.5px solid var(--border2);border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 10px;}
+.state-box{text-align:center;padding:40px 20px;}
+.spinner{width:24px;height:24px;border:2.5px solid var(--border2);border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 10px;}
 @keyframes spin{to{transform:rotate(360deg);}}
-.state-title{font-size:14px;font-weight:700;color:var(--grey);}
+.state-title{font-size:13px;font-weight:600;color:var(--grey);}
 
 @media(max-width:480px){
-  .sum-grid{grid-template-columns:repeat(2,1fr);}
   .week-table{font-size:11px;}
-  .week-table th,.week-table td{padding:6px 6px;}
+  .week-table th,.week-table td{padding:6px 4px;}
 }
 </style>
 </head>
 <body>
 
 <div class="header">
-  <a class="back-btn" href="index.html">← 돌아가기</a>
-  <div class="header-title">HISTORY</div>
-  <div style="width:80px;"></div>
+  <a class="back-btn" href="index.html">← 대시보드</a>
+  <div class="header-title">기록 히스토리</div>
+  <div style="width:84px;"></div>
 </div>
 
 <div class="wrap">
 
-  <!-- 전체 요약 -->
+  <!-- 1. 건강 지표 · 주간 현황 -->
   <div class="section">
+    <div class="sec-label">건강 지표 · 주간 현황</div>
     <div class="sum-grid">
-      <div class="sum-card"><div class="sum-num" id="s-days">—</div><div class="sum-lbl">기록 일수</div></div>
-      <div class="sum-card"><div class="sum-num" id="s-avg-steps">—</div><div class="sum-lbl">평균 걸음수</div></div>
-      <div class="sum-card"><div class="sum-num" id="s-weight-diff">—</div><div class="sum-lbl">기간 체중 변화</div></div>
+      <div class="sum-card"><div class="sum-num" id="s-weight">—</div><div class="sum-lbl">최근 체중</div></div>
+      <div class="sum-card"><div class="sum-num" id="s-waist">—</div><div class="sum-lbl">최근 허리둘레</div></div>
+      <div class="sum-card"><div class="sum-num" id="s-wdiff">—</div><div class="sum-lbl">기간 체중 변화</div></div>
+    </div>
+    <div class="sum-grid">
+      <div class="sum-card plain"><div class="sum-num dk" id="s-steps">—</div><div class="sum-lbl">평균 걸음수</div></div>
+      <div class="sum-card plain"><div class="sum-num dk" id="s-sleep">—</div><div class="sum-lbl">평균 수면</div></div>
+      <div class="sum-card plain"><div class="sum-num dk" id="s-diet">—</div><div class="sum-lbl">식단 준수</div></div>
     </div>
   </div>
 
-  <!-- 주간 평균 (화~월) -->
+  <!-- 주간 테이블 -->
   <div class="section">
     <div class="sec-label">주간 평균 (화~월)</div>
-    <div id="weekly-table-wrap">
+    <div id="weekly-wrap">
       <div class="state-box"><div class="spinner"></div><div class="state-title">불러오는 중...</div></div>
     </div>
   </div>
 
-  <!-- 일별 기록 -->
+  <!-- 2. 수분·영양제 달성 -->
   <div class="section">
-    <div class="sec-label">일별 기록</div>
+    <div class="sec-label">수분 · 영양제 달성 <span style="font-weight:500;color:var(--grey2);text-transform:none;letter-spacing:0;" id="ach-range"></span></div>
+    <div class="ach-grid">
+      <div class="ach-card">
+        <div class="ach-head"><i>💧</i> 수분 (4/4 기준)</div>
+        <div class="ach-val" id="ach-water">— <span>/ — 일 완전 달성</span></div>
+      </div>
+      <div class="ach-card">
+        <div class="ach-head"><i>💊</i> 영양제 (3/3 기준)</div>
+        <div class="ach-val" id="ach-supp">— <span>/ — 일 완전 달성</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. 주간 운동 기록 -->
+  <div class="section" id="workout">
+    <div class="sec-label">주간 운동 기록 (세트 · 횟수 · 메모)</div>
+    <div id="workout-wrap">
+      <div class="state-box"><div class="spinner"></div><div class="state-title">불러오는 중...</div></div>
+    </div>
+  </div>
+
+  <!-- 4. 일별 상세 기록 -->
+  <div class="section">
+    <div class="sec-label">일별 상세 기록</div>
     <div class="filter-row">
-      <input class="filter-inp" type="month" id="filter-month" placeholder="년-월">
+      <input class="filter-inp" type="month" id="filter-month">
       <div class="result-count" id="result-count"></div>
     </div>
     <div class="rec-list" id="record-list">
@@ -124,222 +180,231 @@ body{background:var(--bg);color:var(--white);font-family:'Noto Sans KR',sans-ser
 </div>
 
 <script>
-var GAS_URL = 'https://script.google.com/macros/s/AKfycbysLmM_fov67_179-Td84CI8v5ZNW1aKSotd1eAFFhZkAX4mDuqGmZdX8F2C30Ed63kMQ/exec';
-var DOW_KR  = ['일','월','화','수','목','금','토'];
-var allData = [];
+var GAS_URL = 'https://script.google.com/macros/s/AKfycbyMdLLgpi5Acnm_Hnnzho2boXE1__zQvQjqb-PwBPLY-es-S00EXb8am9O118Pa7f8/exec';
+var DOW = ['일','월','화','수','목','금','토'];
+var daily = [];   // 일별 기록
+var weekly = [];  // 주간측정(체중/허리/체형)
 
-// ── helpers ──────────────────────────────────────────────────
-function parseDate(raw) {
-  var s = String(raw).slice(0,10);
-  var p = s.split('-');
-  return new Date(+p[0], +p[1]-1, +p[2]);
+function parseDate(raw){var s=String(raw).slice(0,10),p=s.split('-');return new Date(+p[0],+p[1]-1,+p[2]);}
+function fmtMD(d){return (d.getMonth()+1)+'월 '+d.getDate()+'일';}
+function fmtShort(d){return (d.getMonth()+1)+'/'+d.getDate();}
+function avg(a){return a.length?+(a.reduce(function(s,v){return s+v;},0)/a.length).toFixed(1):null;}
+// 주의 화요일(화~월 기준)
+function weekTue(date){var d=new Date(date);d.setHours(0,0,0,0);var dow=d.getDay();var diff=dow>=2?dow-2:7+dow-2;d.setDate(d.getDate()-diff);return d;}
+function cntNum(s){ // "3/4" → 3
+  if(s==null)return null;var m=String(s).match(/^(\d+)\s*\/\s*(\d+)/);return m?{got:+m[1],need:+m[2]}:null;
 }
 
-function fmtDate(d) {
-  return (d.getMonth()+1)+'월 '+d.getDate()+'일';
-}
-
-// 해당 날짜가 속하는 주의 화요일 반환 (화~월 기준)
-function getWeekTue(date) {
-  var d = new Date(date); d.setHours(0,0,0,0);
-  var dow = d.getDay();
-  var diff = dow >= 2 ? dow - 2 : 7 + dow - 2;
-  d.setDate(d.getDate() - diff);
-  return d;
-}
-
-function avg(arr) {
-  if (!arr.length) return null;
-  return +(arr.reduce(function(s,v){return s+v;},0)/arr.length).toFixed(1);
-}
-
-// ── 데이터 로드 ───────────────────────────────────────────────
-async function loadData() {
-  try {
-    var res  = await fetch(GAS_URL);
-    var rows = await res.json();
-
-    // 주간기록 제외, 날짜 필터
-    allData = rows
-      .filter(function(r){
-        var d = String(r['날짜']||'');
-        return d && !d.startsWith('주간');
-      })
-      .map(function(r){
-        var d = parseDate(r['날짜']);
-        return {
-          date:     String(r['날짜']).slice(0,10),
-          dateObj:  d,
-          dow:      DOW_KR[d.getDay()],
-          weight:   parseFloat(r['체중'])    || null,
-          steps:    parseInt(r['걸음수'])    || null,
-          sleep:    parseFloat(r['수면시간'])|| null,
-          water:    r['수분']    || r['물']  || '',
-          supp:     r['영양제']  || '',
-          diet:     r['식단준수']|| '',
-          walk_am:  r['아침산책']|| '',
-          walk_noon:r['점심산책']|| '',
-          walk_pm:  r['저녁산책']|| '',
-          core:     r['복근루틴']|| '',
-          phase:    r['단계']    || '',
-          // 훈련기 컬럼 (하위호환)
-          km:       parseFloat(r['러닝km'])  || null,
-          min:      parseInt(r['시간min'])   || null,
-          note:     r['메모']    || ''
-        };
-      })
-      .sort(function(a,b){ return b.dateObj - a.dateObj; });
-
-    // 날짜 중복 제거
-    var seen = {};
-    allData = allData.filter(function(r){
-      if (seen[r.date]) return false;
-      seen[r.date] = true; return true;
+async function load(){
+  try{
+    var res=await fetch(GAS_URL);var rows=await res.json();
+    daily=[];weekly=[];
+    rows.forEach(function(r){
+      var raw=String(r['날짜']||'');
+      if(!raw)return;
+      if(raw.startsWith('주간')){
+        var wd=raw.replace('주간_','').slice(0,10);
+        weekly.push({dateObj:parseDate(wd),weight:parseFloat(r['체중'])||null,waist:parseFloat(r['허리둘레']||r['허리'])||null});
+        return;
+      }
+      var d=parseDate(raw);
+      daily.push({
+        date:raw.slice(0,10), dateObj:d, dow:DOW[d.getDay()],
+        steps:parseInt(r['걸음수'])||null,
+        sleep:parseFloat(r['수면시간'])||null,
+        water:r['수분']||r['물']||'',
+        supp:r['영양제']||'',
+        diet:r['식단준수']||'',
+        walk_am:r['아침산책']||'', walk_noon:r['점심산책']||'', walk_pm:r['저녁산책']||'',
+        core:r['복근']||'',
+        pain:r['통증']||r['pain_achilles']||'',
+        workouts:r['운동']||r['workouts']||'',
+        phase:r['단계']||'',
+        note:r['메모']||''
+      });
     });
+    // 중복 제거 + 정렬(최근순)
+    var seen={};
+    daily=daily.filter(function(r){if(seen[r.date])return false;seen[r.date]=true;return true;})
+               .sort(function(a,b){return b.dateObj-a.dateObj;});
+    weekly.sort(function(a,b){return a.dateObj-b.dateObj;});
 
     renderSummary();
-    renderWeeklyTable();
+    renderWeekly();
+    renderAchievement();
+    renderWorkouts();
     renderList();
-  } catch(e) {
-    document.getElementById('record-list').innerHTML =
-      '<div class="state-box"><div class="state-title">⚠️ 데이터 로드 실패: '+e.message+'</div></div>';
-    document.getElementById('weekly-table-wrap').innerHTML = '';
+  }catch(e){
+    ['weekly-wrap','workout-wrap','record-list'].forEach(function(id){
+      document.getElementById(id).innerHTML='<div class="state-box"><div class="state-title">⚠️ 데이터 로드 실패: '+e.message+'</div></div>';
+    });
   }
 }
 
-// ── 전체 요약 ─────────────────────────────────────────────────
-function renderSummary() {
-  document.getElementById('s-days').textContent = allData.length;
-
-  var stepRows = allData.filter(function(r){ return r.steps; });
-  var avgSteps = stepRows.length ? Math.round(stepRows.reduce(function(s,r){return s+r.steps;},0)/stepRows.length) : null;
-  document.getElementById('s-avg-steps').textContent = avgSteps ? avgSteps.toLocaleString() : '—';
-
-  var wRows = allData.filter(function(r){ return r.weight; });
-  if (wRows.length >= 2) {
-    var diff = (wRows[0].weight - wRows[wRows.length-1].weight).toFixed(1);
-    var el = document.getElementById('s-weight-diff');
-    el.textContent = (diff > 0 ? '+' : '') + diff + 'kg';
-    el.style.color = diff < 0 ? '#34D399' : diff > 0 ? '#F87171' : '#6B7FA8';
+// ── 1. 요약 ─────────────────────────────────────
+function renderSummary(){
+  // 체중·허리: 주간측정 우선, 없으면 —
+  var wRows=weekly.filter(function(r){return r.weight;});
+  if(wRows.length){
+    var last=wRows[wRows.length-1];
+    document.getElementById('s-weight').innerHTML=last.weight+'<small>kg</small>';
+    if(wRows.length>=2){
+      var diff=(last.weight-wRows[0].weight).toFixed(1);
+      var el=document.getElementById('s-wdiff');
+      el.innerHTML=(diff>0?'+':'')+diff+'<small>kg</small>';
+      el.className='sum-num '+(diff<0?'down':diff>0?'up':'');
+    }
   }
+  var waistRows=weekly.filter(function(r){return r.waist;});
+  if(waistRows.length)document.getElementById('s-waist').innerHTML=waistRows[waistRows.length-1].waist+'<small>cm</small>';
+
+  // 평균 걸음·수면·식단 (전체 일별 기준)
+  var steps=daily.filter(function(r){return r.steps;}).map(function(r){return r.steps;});
+  var sleeps=daily.filter(function(r){return r.sleep;}).map(function(r){return r.sleep;});
+  var dietDays=daily.filter(function(r){return r.diet==='✅';}).length;
+  if(steps.length)document.getElementById('s-steps').textContent=Math.round(steps.reduce(function(s,v){return s+v;},0)/steps.length).toLocaleString();
+  if(sleeps.length)document.getElementById('s-sleep').textContent=avg(sleeps)+'h';
+  document.getElementById('s-diet').textContent=dietDays+' / '+daily.length;
 }
 
-// ── 주간 평균 테이블 (화~월) ──────────────────────────────────
-function renderWeeklyTable() {
-  // 주차별 그룹핑
-  var weeks = {};
-  allData.forEach(function(r) {
-    var tue = getWeekTue(r.dateObj);
-    var key = tue.getFullYear()+'-'+(tue.getMonth()+1)+'-'+tue.getDate();
-    if (!weeks[key]) weeks[key] = {tue:tue, rows:[]};
+// ── 주간 테이블 ─────────────────────────────────
+function renderWeekly(){
+  var weeks={};
+  daily.forEach(function(r){
+    var tue=weekTue(r.dateObj),key=tue.getFullYear()+'-'+(tue.getMonth()+1)+'-'+tue.getDate();
+    if(!weeks[key])weeks[key]={tue:tue,rows:[]};
     weeks[key].rows.push(r);
   });
-
-  var keys = Object.keys(weeks).sort(function(a,b){ return b > a ? 1 : -1; });
-  if (!keys.length) {
-    document.getElementById('weekly-table-wrap').innerHTML =
-      '<div style="font-size:12px;color:var(--grey);padding:10px 0;">기록이 없어요.</div>';
-    return;
-  }
-
-  var nowTue = getWeekTue(new Date());
-  var nowKey = nowTue.getFullYear()+'-'+(nowTue.getMonth()+1)+'-'+nowTue.getDate();
-
-  var thead = '<tr>'
-    + '<th style="text-align:left;">기간</th>'
-    + '<th>평균<br>체중</th>'
-    + '<th>평균<br>걸음수</th>'
-    + '<th>평균<br>수면</th>'
-    + '<th>식단<br>준수</th>'
-    + '</tr>';
-
-  var tbody = keys.map(function(key) {
-    var w = weeks[key];
-    var mon = new Date(w.tue); mon.setDate(w.tue.getDate() + 6);
-    var period = (w.tue.getMonth()+1)+'/'+w.tue.getDate()
-      + ' ~ ' + (mon.getMonth()+1)+'/'+mon.getDate();
-
-    var weights = w.rows.filter(function(r){return r.weight;}).map(function(r){return r.weight;});
-    var steps   = w.rows.filter(function(r){return r.steps;}).map(function(r){return r.steps;});
-    var sleeps  = w.rows.filter(function(r){return r.sleep;}).map(function(r){return r.sleep;});
-    var dietDays= w.rows.filter(function(r){return r.diet==='✅';}).length;
-
-    var avgW  = avg(weights);
-    var avgS  = steps.length  ? Math.round(steps.reduce(function(s,v){return s+v;},0)/steps.length) : null;
-    var avgSl = avg(sleeps);
-    var isCur = key === nowKey;
-
-    return '<tr class="'+(isCur?'wk-cur':'')+'">'
-      + '<td class="wk-period">'+period+'</td>'
-      + '<td>'+(avgW  ? avgW+'kg' : '—')+'</td>'
-      + '<td>'+(avgS  ? avgS.toLocaleString() : '—')+'</td>'
-      + '<td>'+(avgSl ? avgSl+'h' : '—')+'</td>'
-      + '<td>'+dietDays+'/'+w.rows.length+'일</td>'
-      + '</tr>';
-  }).join('');
-
-  document.getElementById('weekly-table-wrap').innerHTML =
-    '<table class="week-table"><thead>'+thead+'</thead><tbody>'+tbody+'</tbody></table>';
-}
-
-// ── 일별 카드 ─────────────────────────────────────────────────
-function renderCard(r, prevWeight) {
-  // 체중 diff
-  var diffHtml = '';
-  if (r.weight && prevWeight) {
-    var d = (r.weight - prevWeight).toFixed(1);
-    var cls = d < 0 ? 'diff-down' : d > 0 ? 'diff-up' : '';
-    diffHtml = '<div class="rec-wdiff '+cls+'">'+(d>0?'+':'')+d+'kg</div>';
-  }
-
-  // 메트릭 뱃지
-  var metrics = '';
-  // 회복기 데이터
-  if (r.steps)  metrics += '<div class="rec-metric walk">👟 <span>'+r.steps.toLocaleString()+'보</span></div>';
-  if (r.sleep)  metrics += '<div class="rec-metric walk">😴 <span>'+r.sleep+'h</span></div>';
-  var walks = [r.walk_am?'아침':'', r.walk_noon?'점심':'', r.walk_pm?'저녁':''].filter(Boolean);
-  if (walks.length) metrics += '<div class="rec-metric act">🚶 <span>'+walks.join('·')+'</span></div>';
-  if (r.core==='✅') metrics += '<div class="rec-metric act">💪 <span>복근 완료</span></div>';
-  // 훈련기 데이터 (하위호환)
-  if (r.km) metrics += '<div class="rec-metric run">🏃 <span>'+r.km+'km</span></div>';
-
-  return '<div class="rec-card">'
-    + '<div class="rec-head">'
-    +   '<div><div class="rec-date">'+fmtDate(r.dateObj)+' '+r.dow+'</div>'
-    +   (r.phase ? '<div style="font-size:10px;color:var(--grey);margin-top:2px;">'+r.phase+'</div>' : '')
-    +   '</div>'
-    +   (r.weight ? '<div style="text-align:right"><div class="rec-weight">'+r.weight+'<span style="font-size:12px;color:var(--grey);">kg</span></div>'+diffHtml+'</div>' : '')
-    + '</div>'
-    + (metrics ? '<div class="rec-metrics">'+metrics+'</div>' : '')
-    + (r.note   ? '<div class="rec-note">'+r.note+'</div>' : '')
-    + '</div>';
-}
-
-// ── 일별 리스트 ───────────────────────────────────────────────
-function renderList() {
-  var month = document.getElementById('filter-month').value;
-  var filtered = allData.filter(function(r){
-    return !month || r.date.slice(0,7) === month;
+  // 주간측정(체중/허리) 매핑
+  var wkMeasure={};
+  weekly.forEach(function(m){
+    var tue=weekTue(m.dateObj),key=tue.getFullYear()+'-'+(tue.getMonth()+1)+'-'+tue.getDate();
+    wkMeasure[key]=m;
   });
+  var keys=Object.keys(weeks).sort(function(a,b){return weeks[b].tue-weeks[a].tue;});
+  if(!keys.length){document.getElementById('weekly-wrap').innerHTML='<div class="state-box"><div class="state-title">기록이 없어요</div></div>';return;}
 
-  document.getElementById('result-count').textContent = filtered.length + '개';
-
-  if (!filtered.length) {
-    document.getElementById('record-list').innerHTML =
-      '<div class="state-box"><div class="state-title">📭 해당하는 기록이 없어요</div></div>';
-    return;
-  }
-
-  var wMap = {};
-  allData.filter(function(r){return r.weight;})
-    .forEach(function(r,i,arr){ if(i+1<arr.length) wMap[r.date]=arr[i+1].weight; });
-
-  document.getElementById('record-list').innerHTML =
-    filtered.map(function(r){ return renderCard(r, wMap[r.date]); }).join('');
+  var nowKey=(function(){var t=weekTue(new Date());return t.getFullYear()+'-'+(t.getMonth()+1)+'-'+t.getDate();})();
+  var head='<tr><th>기간</th><th>체중</th><th>허리</th><th>걸음</th><th>수면</th><th>식단</th></tr>';
+  var body=keys.map(function(key){
+    var w=weeks[key],mon=new Date(w.tue);mon.setDate(w.tue.getDate()+6);
+    var period=fmtShort(w.tue)+'~'+fmtShort(mon);
+    var steps=w.rows.filter(function(r){return r.steps;}).map(function(r){return r.steps;});
+    var sleeps=w.rows.filter(function(r){return r.sleep;}).map(function(r){return r.sleep;});
+    var dietDays=w.rows.filter(function(r){return r.diet==='✅';}).length;
+    var m=wkMeasure[key]||{};
+    var avgS=steps.length?(Math.round(steps.reduce(function(s,v){return s+v;},0)/steps.length/100)/10)+'k':'—';
+    return '<tr class="'+(key===nowKey?'wk-cur':'')+'">'
+      +'<td class="wk-period">'+period+'</td>'
+      +'<td>'+(m.weight?m.weight:'—')+'</td>'
+      +'<td>'+(m.waist?m.waist:'—')+'</td>'
+      +'<td>'+avgS+'</td>'
+      +'<td>'+(avg(sleeps)?avg(sleeps)+'h':'—')+'</td>'
+      +'<td>'+dietDays+'/'+w.rows.length+'</td>'
+      +'</tr>';
+  }).join('');
+  document.getElementById('weekly-wrap').innerHTML='<div class="week-table-wrap"><table class="week-table"><thead>'+head+'</thead><tbody>'+body+'</tbody></table></div>';
 }
 
-document.getElementById('filter-month').addEventListener('change', renderList);
-loadData();
+// ── 2. 수분·영양제 달성 일수 (이번 주 화~오늘) ───
+function renderAchievement(){
+  var tue=weekTue(new Date()),now=new Date();now.setHours(0,0,0,0);
+  var inWeek=daily.filter(function(r){var x=new Date(r.dateObj);x.setHours(0,0,0,0);return x>=tue&&x<=now;});
+  var waterDays=0,suppDays=0;
+  inWeek.forEach(function(r){
+    var w=cntNum(r.water);if(w&&w.got>=w.need)waterDays++;
+    var s=cntNum(r.supp);if(s&&s.got>=s.need)suppDays++;
+  });
+  var n=inWeek.length;
+  document.getElementById('ach-range').textContent='· 이번 주 '+fmtShort(tue)+'~'+fmtShort(now);
+  document.getElementById('ach-water').innerHTML=waterDays+' <span>/ '+n+'일 완전 달성</span>';
+  document.getElementById('ach-supp').innerHTML=suppDays+' <span>/ '+n+'일 완전 달성</span>';
+}
+
+// ── workouts 요약 문자열 파싱 ───────────────────
+// "푸시업[기본 푸시업] 12/10 ✅ (S1:8개부터 흔들림) | 턱걸이[밴드 5단계] 8"
+function parseWorkouts(str){
+  if(!str)return [];
+  return String(str).split('|').map(function(seg){
+    seg=seg.trim();if(!seg)return null;
+    var done=/✅/.test(seg);seg=seg.replace('✅','').trim();
+    var memo='';var mm=seg.match(/\(([^)]*)\)\s*$/);if(mm){memo=mm[1].trim();seg=seg.slice(0,mm.index).trim();}
+    var variant='';var vm=seg.match(/\[([^\]]*)\]/);if(vm){variant=vm[1].trim();seg=seg.replace(vm[0],'').trim();}
+    var sp=seg.indexOf(' ');var name=sp>0?seg.slice(0,sp).trim():seg;var reps=sp>0?seg.slice(sp+1).trim():'';
+    return {name:name,variant:variant,reps:reps,memo:memo,done:done};
+  }).filter(Boolean);
+}
+
+// ── 3. 주간 운동 기록 (주차별 그룹) ─────────────
+function renderWorkouts(){
+  var woDays=daily.filter(function(r){return r.workouts&&r.workouts.trim();});
+  if(!woDays.length){document.getElementById('workout-wrap').innerHTML='<div class="state-box"><div class="state-title">🏋️ 운동 기록이 아직 없어요</div></div>';return;}
+  var weeks={};
+  woDays.forEach(function(r){
+    var tue=weekTue(r.dateObj),key=tue.getFullYear()+'-'+(tue.getMonth()+1)+'-'+tue.getDate();
+    if(!weeks[key])weeks[key]={tue:tue,rows:[]};
+    weeks[key].rows.push(r);
+  });
+  var keys=Object.keys(weeks).sort(function(a,b){return weeks[b].tue-weeks[a].tue;});
+  var html=keys.map(function(key){
+    var w=weeks[key],mon=new Date(w.tue);mon.setDate(w.tue.getDate()+6);
+    var rows=w.rows.slice().sort(function(a,b){return b.dateObj-a.dateObj;});
+    var totSets=0,totReps=0,doneCnt=0;
+    var daysHtml=rows.map(function(r){
+      var exs=parseWorkouts(r.workouts);
+      var exHtml=exs.map(function(ex){
+        // reps "12/10" → 세트 표기
+        var repArr=ex.reps?ex.reps.split('/').filter(function(x){return x!=='';}):[];
+        repArr.forEach(function(x){var n=parseInt(x);if(!isNaN(n)){totReps+=n;}});
+        totSets+=repArr.length;
+        if(ex.done)doneCnt++;
+        var setsTxt=repArr.length?repArr.map(function(x,i){return (i+1)+'세트 '+x+'회';}).join(' · '):'기록 없음';
+        return '<div class="ex-block">'
+          +'<div class="ex-line1"><div><span class="ex-nm">'+ex.name+'</span>'+(ex.variant?'<span class="ex-var">'+ex.variant+'</span>':'')+'</div>'
+          +(ex.done?'<span class="ex-done">✓ 완료</span>':'<span class="ex-todo">미완료</span>')+'</div>'
+          +'<div class="ex-sets">'+setsTxt+'</div>'
+          +(ex.memo?'<div class="ex-memo">📝 '+ex.memo.replace(/S(\d+):/g,'$1세트 ')+'</div>':'')
+          +'</div>';
+      }).join('');
+      return '<div class="wo-day"><div class="wo-day-date">'+fmtMD(r.dateObj)+' <span class="dow">'+r.dow+'</span></div>'+exHtml+'</div>';
+    }).join('');
+    return '<div class="wo-week"><div class="wo-week-head"><div class="wo-week-period">'+fmtShort(w.tue)+' ~ '+fmtShort(mon)+'</div>'
+      +'<div class="wo-week-stat">완료 '+doneCnt+'개 · 총 '+totSets+'세트 · '+totReps+'회</div></div>'+daysHtml+'</div>';
+  }).join('');
+  document.getElementById('workout-wrap').innerHTML=html;
+}
+
+// ── 4. 일별 상세 ────────────────────────────────
+function renderCard(r){
+  var metrics='';
+  if(r.steps)metrics+='<div class="rec-metric act">👟 <span>'+r.steps.toLocaleString()+'보</span></div>';
+  if(r.sleep)metrics+='<div class="rec-metric act">😴 <span>'+r.sleep+'h</span></div>';
+  if(r.water)metrics+='<div class="rec-metric">💧 <span>'+r.water+'</span></div>';
+  if(r.supp)metrics+='<div class="rec-metric">💊 <span>'+r.supp+'</span></div>';
+  var walks=[r.walk_am?'아침':'',r.walk_noon?'점심':'',r.walk_pm?'저녁':''].filter(Boolean);
+  if(walks.length)metrics+='<div class="rec-metric act">🚶 <span>'+walks.join('·')+'</span></div>';
+  if(r.core==='✅')metrics+='<div class="rec-metric act">💪 <span>복근</span></div>';
+  if(r.diet==='✅')metrics+='<div class="rec-metric ok">🍽️ <span>식단 준수</span></div>';
+  else if(r.diet==='❌')metrics+='<div class="rec-metric no">🍽️ <span>식단 미준수</span></div>';
+  if(r.pain!==''&&r.pain!=null)metrics+='<div class="rec-metric">🩹 통증 <span>'+r.pain+'</span></div>';
+
+  return '<div class="rec-card"><div class="rec-head">'
+    +'<div><div class="rec-date">'+fmtMD(r.dateObj)+' '+r.dow+'</div>'+(r.phase?'<div class="rec-phase">'+r.phase+'</div>':'')+'</div>'
+    +'</div>'
+    +(metrics?'<div class="rec-metrics">'+metrics+'</div>':'')
+    +(r.note?'<div class="rec-note">'+r.note+'</div>':'')
+    +'</div>';
+}
+function renderList(){
+  var month=document.getElementById('filter-month').value;
+  var filtered=daily.filter(function(r){return !month||r.date.slice(0,7)===month;});
+  document.getElementById('result-count').textContent=filtered.length+'개';
+  if(!filtered.length){document.getElementById('record-list').innerHTML='<div class="state-box"><div class="state-title">📭 해당 기록이 없어요</div></div>';return;}
+  document.getElementById('record-list').innerHTML=filtered.map(renderCard).join('');
+}
+
+document.getElementById('filter-month').addEventListener('change',renderList);
+load();
 </script>
 </body>
 </html>
