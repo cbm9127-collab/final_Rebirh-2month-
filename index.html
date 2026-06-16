@@ -401,7 +401,7 @@ canvas{display:block;width:100%;}
 </div>
 
 <script>
-var GAS = 'https://script.google.com/macros/s/AKfycbyMdLLgpi5Acnm_Hnnzho2boXE1__zQvQjqb-PwBPLY-es-S00EXb8am9O118Pa7f8/exec';
+var GAS = 'https://script.google.com/macros/s/AKfycbysLmM_fov67_179-Td84CI8v5ZNW1aKSotd1eAFFhZkAX4mDuqGmZdX8F2C30Ed63kMQ/exec';
 var DOW = ['일','월','화','수','목','금','토'];
 var sheetsData = [];
 
@@ -438,6 +438,10 @@ function lsGet(k){try{return JSON.parse(localStorage.getItem(k)||'null');}catch(
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
 function dateKey(d){d=d||new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();}
 function padDate(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+// "2026-06-23"(input) → "2026-6-23"(dateKey 포맷)으로 통일
+function keyFromInput(v){if(!v)return dateKey();var p=String(v).split('-');return (+p[0])+'-'+(+p[1])+'-'+(+p[2]);}
+// 현재 선택된 날짜 input 값을 dateKey 포맷으로
+function curKey(){var de=document.getElementById('log-date');return de&&de.value?keyFromInput(de.value):dateKey();}
 function sameDay(a,b){return a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate();}
 function midnight(d){var x=new Date(d);x.setHours(0,0,0,0);return x;}
 function inRange(d,a,b){var x=midnight(d);return x>=midnight(a)&&x<=midnight(b);}
@@ -710,15 +714,17 @@ function resetToday(){['water_','supp_','act_','wo_','pain_'].forEach(function(p
 
 function loadLog(){var de=document.getElementById('log-date');if(de&&!de.value)de.value=padDate(new Date());var log=lsGet('log_'+dateKey());if(!log)return;if(log.steps)document.getElementById('log-steps').value=log.steps;if(log.sleep)document.getElementById('log-sleep').value=log.sleep;if(log.diet)setDietVal(log.diet);if(log.note)document.getElementById('log-note').value=log.note;}
 async function saveLog(){
-  var now=new Date(),ds=document.getElementById('log-date').value||padDate(now);
-  var waterCnt=Object.values(lsGet('water_'+dateKey())||{}).filter(Boolean).length;
-  var suppCnt=Object.values(lsGet('supp_'+dateKey())||{}).filter(Boolean).length;
-  var actState=lsGet('act_'+dateKey())||{},pain=lsGet('pain_'+dateKey())||{},wo=lsGet('wo_'+dateKey())||{};
-  var diet=getDietVal(),phase=phaseOf(now);
+  var now=new Date();
+  var k=curKey();                      // 로컬 저장 키 (input 날짜 기준, dateKey 포맷)
+  var ds=padDate(new Date(k.split('-')[0],k.split('-')[1]-1,k.split('-')[2])); // 전송용 0패딩 날짜
+  var waterCnt=Object.values(lsGet('water_'+k)||{}).filter(Boolean).length;
+  var suppCnt=Object.values(lsGet('supp_'+k)||{}).filter(Boolean).length;
+  var actState=lsGet('act_'+k)||{},pain=lsGet('pain_'+k)||{},wo=lsGet('wo_'+k)||{};
+  var diet=getDietVal(),phase=phaseOf(new Date(k.split('-')[0],k.split('-')[1]-1,k.split('-')[2]));
   // 운동 상세 요약 문자열 생성 (Sheets 'workouts' 컬럼용)
   var woSummary=buildWoSummary(wo);
   var log={steps:document.getElementById('log-steps').value,sleep:document.getElementById('log-sleep').value,diet:diet,note:document.getElementById('log-note').value};
-  lsSet('log_'+dateKey(),log);
+  lsSet('log_'+k,log);
   document.getElementById('log-msg').textContent='✅ 저장 완료';calcWeeklyStats();
   var btn=document.getElementById('save-btn');if(btn){btn.disabled=true;btn.textContent='저장 중...';}
   var sy=document.getElementById('sync-status');if(sy)sy.innerHTML='<div class="sbadge loading">⏳ Sheets 저장 중...</div>';
