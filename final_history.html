@@ -83,19 +83,16 @@ body{background:var(--bg);color:var(--white);font-family:'Noto Sans KR',sans-ser
 .ex-sets{font-size:12px;color:var(--white);line-height:1.6;}
 .ex-memo{font-size:11px;color:var(--grey);margin-top:4px;font-style:italic;line-height:1.6;}
 
-/* 일별 카드 */
+/* 일별 카드 (간소화 + 메모 강조) */
 .rec-list{display:flex;flex-direction:column;gap:8px;}
-.rec-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow);padding:14px 16px;}
-.rec-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
-.rec-date{font-size:13px;font-weight:700;}
-.rec-phase{font-size:10px;color:var(--grey);margin-top:2px;}
-.rec-metrics{display:flex;gap:6px;flex-wrap:wrap;}
-.rec-metric{background:var(--card2);border-radius:6px;padding:5px 9px;font-size:11px;font-weight:600;color:var(--grey);}
-.rec-metric span{color:var(--white);font-weight:700;}
-.rec-metric.ok{border-left:2px solid var(--green);}
-.rec-metric.no{border-left:2px solid var(--red);}
-.rec-metric.act{border-left:2px solid var(--blue);}
-.rec-note{font-size:11px;color:var(--grey);background:var(--card2);border-radius:6px;padding:7px 9px;line-height:1.6;font-style:italic;margin-top:8px;}
+.rec-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow);padding:13px 15px;}
+.rec-head{margin-bottom:8px;}
+.rec-date{font-size:13px;font-weight:800;color:var(--white);}
+.rec-dow{font-size:11px;color:var(--grey);font-weight:600;}
+.rec-phase{font-size:10px;color:var(--blue3);font-weight:700;background:var(--blue-dim);padding:1px 7px;border-radius:5px;}
+.rec-summary{font-size:12px;color:var(--grey);font-weight:600;display:flex;flex-wrap:wrap;align-items:center;gap:3px;}
+.rec-summary .dot{color:var(--grey2);font-style:normal;margin:0 2px;}
+.rec-note-big{font-size:14px;color:var(--white);font-weight:500;background:var(--card2);border-left:3px solid var(--blue);border-radius:8px;padding:11px 13px;line-height:1.65;margin-top:9px;}
 
 /* 상태 */
 .state-box{text-align:center;padding:40px 20px;}
@@ -191,9 +188,11 @@ function fmtShort(d){return (d.getMonth()+1)+'/'+d.getDate();}
 function avg(a){return a.length?+(a.reduce(function(s,v){return s+v;},0)/a.length).toFixed(1):null;}
 // 주의 화요일(화~월 기준)
 function weekTue(date){var d=new Date(date);d.setHours(0,0,0,0);var dow=d.getDay();var diff=dow>=2?dow-2:7+dow-2;d.setDate(d.getDate()-diff);return d;}
-function cntNum(s){ // "3/4" → 3
+function cntNum(s){ // "3/4" → {got,need}
   if(s==null)return null;var m=String(s).match(/^(\d+)\s*\/\s*(\d+)/);return m?{got:+m[1],need:+m[2]}:null;
 }
+// "n/n" 형식만 유효, 그 외(날짜 등)는 빈 문자열
+function validFrac(v){if(v==null)return '';return /^\d+\s*\/\s*\d+$/.test(String(v).trim())?String(v).trim():'';}
 
 async function load(){
   try{
@@ -210,17 +209,17 @@ async function load(){
       var d=parseDate(raw);
       daily.push({
         date:raw.slice(0,10), dateObj:d, dow:DOW[d.getDay()],
-        steps:parseInt(r['걸음수'])||null,
-        sleep:parseFloat(r['수면시간'])||null,
-        water:r['수분']||r['물']||'',
-        supp:r['영양제']||'',
-        diet:r['식단준수']||'',
-        walk_am:r['아침산책']||'', walk_noon:r['점심산책']||'', walk_pm:r['저녁산책']||'',
-        core:r['복근']||'',
+        steps:parseInt(r['걸음수']||r['steps'])||null,
+        sleep:parseFloat(r['수면시간']||r['sleep'])||null,
+        water:validFrac(r['수분']||r['물']||r['water']),
+        supp:validFrac(r['영양제']||r['supp']),
+        diet:r['식단준수']||r['diet']||'',
+        walk_am:r['아침산책']||r['walk_am']||'', walk_noon:r['점심산책']||r['walk_noon']||'', walk_pm:r['저녁산책']||r['walk_pm']||'',
+        core:r['복근']||r['core']||'',
         pain:r['통증']||r['pain_achilles']||'',
         workouts:r['운동']||r['workouts']||'',
-        phase:r['단계']||'',
-        note:r['메모']||''
+        phase:r['단계']||r['phase']||'',
+        note:r['메모']||r['note']||''
       });
     });
     // 중복 제거 + 정렬(최근순)
@@ -338,7 +337,7 @@ function parseWorkouts(str){
 // ── 3. 주간 운동 기록 (주차별 그룹) ─────────────
 function renderWorkouts(){
   var woDays=daily.filter(function(r){return r.workouts&&r.workouts.trim();});
-  if(!woDays.length){document.getElementById('workout-wrap').innerHTML='<div class="state-box"><div class="state-title">🏋️ 운동 기록이 아직 없어요</div></div>';return;}
+  if(!woDays.length){document.getElementById('workout-wrap').innerHTML='<div class="state-box"><div class="state-title">🏋️ 운동 기록이 아직 없어요</div><div style="font-size:11px;color:var(--grey2);margin-top:6px;">대시보드에서 저장했는데도 비어 있다면, 시트에 <b>운동</b> 헤더 컬럼이 있는지 확인하세요</div></div>';return;}
   var weeks={};
   woDays.forEach(function(r){
     var tue=weekTue(r.dateObj),key=tue.getFullYear()+'-'+(tue.getMonth()+1)+'-'+tue.getDate();
@@ -376,23 +375,24 @@ function renderWorkouts(){
 
 // ── 4. 일별 상세 ────────────────────────────────
 function renderCard(r){
-  var metrics='';
-  if(r.steps)metrics+='<div class="rec-metric act">👟 <span>'+r.steps.toLocaleString()+'보</span></div>';
-  if(r.sleep)metrics+='<div class="rec-metric act">😴 <span>'+r.sleep+'h</span></div>';
-  if(r.water)metrics+='<div class="rec-metric">💧 <span>'+r.water+'</span></div>';
-  if(r.supp)metrics+='<div class="rec-metric">💊 <span>'+r.supp+'</span></div>';
+  // 핵심 지표 한 줄 요약(아이콘 + 값)
+  var bits=[];
+  if(r.steps)bits.push('👟 '+r.steps.toLocaleString());
+  if(r.sleep)bits.push('😴 '+r.sleep+'h');
   var walks=[r.walk_am?'아침':'',r.walk_noon?'점심':'',r.walk_pm?'저녁':''].filter(Boolean);
-  if(walks.length)metrics+='<div class="rec-metric act">🚶 <span>'+walks.join('·')+'</span></div>';
-  if(r.core==='✅')metrics+='<div class="rec-metric act">💪 <span>복근</span></div>';
-  if(r.diet==='✅')metrics+='<div class="rec-metric ok">🍽️ <span>식단 준수</span></div>';
-  else if(r.diet==='❌')metrics+='<div class="rec-metric no">🍽️ <span>식단 미준수</span></div>';
-  if(r.pain!==''&&r.pain!=null)metrics+='<div class="rec-metric">🩹 통증 <span>'+r.pain+'</span></div>';
+  if(walks.length)bits.push('🚶 '+walks.join('·'));
+  if(r.core==='✅')bits.push('💪 복근');
+  if(r.diet==='✅')bits.push('🍽️ 준수');
+  else if(r.diet==='❌')bits.push('🍽️ 미준수');
+  if(r.pain!==''&&r.pain!=null&&!isNaN(parseInt(r.pain)))bits.push('🩹 '+parseInt(r.pain));
+  // 식단 색상 클래스
+  var dietCls = r.diet==='✅'?'sm-ok':r.diet==='❌'?'sm-no':'';
+  var summary = bits.length?'<div class="rec-summary '+dietCls+'">'+bits.join('<i class="dot">·</i>')+'</div>':'';
 
-  return '<div class="rec-card"><div class="rec-head">'
-    +'<div><div class="rec-date">'+fmtMD(r.dateObj)+' '+r.dow+'</div>'+(r.phase?'<div class="rec-phase">'+r.phase+'</div>':'')+'</div>'
-    +'</div>'
-    +(metrics?'<div class="rec-metrics">'+metrics+'</div>':'')
-    +(r.note?'<div class="rec-note">'+r.note+'</div>':'')
+  return '<div class="rec-card">'
+    +'<div class="rec-head"><div class="rec-date">'+fmtMD(r.dateObj)+' <span class="rec-dow">'+r.dow+'</span>'+(r.phase?' <span class="rec-phase">'+r.phase+'</span>':'')+'</div></div>'
+    + summary
+    +(r.note?'<div class="rec-note-big">'+r.note+'</div>':'')
     +'</div>';
 }
 function renderList(){
