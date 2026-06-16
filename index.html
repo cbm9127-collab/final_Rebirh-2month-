@@ -78,10 +78,12 @@ body{background:var(--bg);color:var(--white);font-family:'Noto Sans KR',sans-ser
 .dd-badge.rest{background:rgba(107,127,168,0.15);color:var(--grey);}
 .dd-badge.work{background:var(--blue-dim);color:var(--blue);}
 .health-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);box-shadow:0 1px 3px rgba(180,150,60,0.10);}
-.weekly-head{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;cursor:pointer;user-select:none;}
+.weekly-head{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;user-select:none;}
+.weekly-head.static{cursor:default;}
 .weekly-head-title{font-size:14px;font-weight:700;}
 .weekly-toggle{font-size:11px;color:var(--blue);}
 .weekly-body{padding:0 16px 16px;display:none;}
+.weekly-body.open{display:block;}
 .metric-row{display:flex;align-items:center;gap:10px;background:var(--card2);border-radius:9px;padding:12px 14px;margin-bottom:8px;}
 .metric-lbl{font-size:12px;color:var(--grey);flex:1;}
 .metric-lbl small{display:block;font-size:9px;color:var(--grey2);margin-top:2px;}
@@ -89,7 +91,8 @@ body{background:var(--bg);color:var(--white);font-family:'Noto Sans KR',sans-ser
 .metric-inp:focus{border-color:var(--blue);}
 .metric-unit{font-size:12px;color:var(--grey);width:24px;}
 input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
-.weight-lock{font-size:10px;color:var(--amber);background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.2);border-radius:8px;padding:9px 11px;margin-bottom:8px;line-height:1.6;}
+.weight-lock{font-size:13px;color:var(--amber);background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.2);border-radius:8px;padding:12px 14px;margin-bottom:8px;line-height:1.7;}
+.weight-lock b{font-size:13px;}
 .weekly-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:8px 0 12px;}
 .wstat{background:var(--card2);border-radius:9px;padding:12px;text-align:center;}
 .wstat-val{font-size:20px;font-weight:800;color:var(--blue);}
@@ -107,6 +110,9 @@ canvas{display:block;width:100%;}
 .diet-time .diet-kcal{font-size:12px;font-weight:700;color:var(--blue);}
 .diet-menu{font-size:14px;color:var(--white);font-weight:500;line-height:1.7;}
 .diet-summary{background:var(--card2);border-radius:9px;padding:11px 14px;display:flex;justify-content:space-around;text-align:center;margin-bottom:8px;}
+.milk-note{font-size:11px;color:var(--grey);margin-top:10px;background:var(--card2);border-radius:7px;padding:7px 10px;}
+.milk-note.on{color:var(--blue3);font-weight:700;background:var(--blue-dim);border:1px solid var(--border2);}
+.milk-safety{font-size:10px;color:var(--amber);margin-top:8px;background:rgba(251,191,36,0.10);border:1px solid rgba(245,158,11,0.25);border-radius:7px;padding:8px 10px;line-height:1.6;}
 .ds-item .ds-val{font-size:16px;font-weight:800;color:var(--blue);}
 .ds-item .ds-lbl{font-size:9px;color:var(--grey);margin-top:2px;}
 .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
@@ -271,16 +277,90 @@ canvas{display:block;width:100%;}
     </div>
   </div>
 
+
+  <div class="section">
+    <div class="sec-label">오늘의 식단 <span class="sec-hint" id="diet-phase-tag">—</span></div>
+    <div class="diet-summary">
+      <div class="ds-item"><div class="ds-val" id="ds-kcal">—</div><div class="ds-lbl">목표 kcal</div></div>
+      <div class="ds-item"><div class="ds-val" id="ds-protein">—</div><div class="ds-lbl">단백질 목표 (g)</div></div>
+      <div class="ds-item"><div class="ds-val" id="ds-egg">3/3</div><div class="ds-lbl">전란 (개)</div></div>
+    </div>
+    <div class="diet-item">
+      <div class="diet-time">🌅 아침 <span class="diet-kcal" id="k-breakfast">—</span></div>
+      <div class="diet-menu" id="today-breakfast">—</div>
+    </div>
+    <div class="diet-item">
+      <div class="diet-time">☀️ 점심 <span class="diet-kcal" id="k-lunch">—</span></div>
+      <div class="diet-menu" id="today-lunch">—</div>
+    </div>
+    <div class="diet-item" id="snack-item">
+      <div class="diet-time">🍪 간식 <span class="diet-kcal" id="k-snack">—</span></div>
+      <div class="diet-menu" id="today-snack">—</div>
+    </div>
+    <div class="diet-item">
+      <div class="diet-time">🌙 저녁 <span class="diet-kcal" id="k-dinner">—</span></div>
+      <div class="diet-menu" id="today-dinner">—</div>
+      <div id="milk-control"></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="sec-label">오늘의 기록</div>
+    <div class="log-card">
+      <div style="margin-bottom:8px;">
+        <div class="field-lbl">날짜</div>
+        <input class="inp" type="date" id="log-date" style="width:100%;font-size:13px;">
+      </div>
+      <div class="log-row1">
+        <div><div class="field-lbl">걸음수</div><input class="inp" type="number" step="100" id="log-steps" placeholder="7000"></div>
+        <div><div class="field-lbl">수면시간 (h)</div><input class="inp" type="number" step="0.5" id="log-sleep" placeholder="7.5"></div>
+        <div><div class="field-lbl">식단 준수</div><button class="diet-check-btn" id="diet-btn" onclick="toggleDiet()">—</button></div>
+      </div>
+      <div class="pain-wrap">
+        <div class="tracker-head" style="margin-bottom:6px;"><div class="tracker-lbl">🩹 통증 (0~10, 매일)</div></div>
+        <div class="pain-row">
+          <div class="pain-lbl">아킬레스</div>
+          <input class="pain-slider" type="range" min="0" max="10" value="0" id="pain-achilles" oninput="updatePain()">
+          <div class="pain-val lo" id="pain-achilles-v">0</div>
+        </div>
+      </div>
+      <div class="tracker-wrap">
+        <div class="tracker-head"><div class="tracker-lbl">💧 수분 (875ml × 4)</div><div class="tracker-val" id="water-count">0 / 4</div></div>
+        <div class="tracker-btns" style="grid-template-columns:repeat(4,1fr);" id="water-btns"></div>
+      </div>
+      <div class="tracker-wrap">
+        <div class="tracker-head"><div class="tracker-lbl">💊 영양제</div><div class="tracker-val" id="supp-count">0 / 3</div></div>
+        <div class="tracker-btns" style="grid-template-columns:repeat(3,1fr);" id="supp-btns"></div>
+      </div>
+      <div class="tracker-wrap" id="wo-wrap">
+        <div class="tracker-head">
+          <div class="tracker-lbl">🏋️ 오늘의 운동 <span class="sec-hint" id="wo-phase-tag" style="font-weight:400;">—</span></div>
+          <a class="wo-week-link" href="final_history.html#workout">주간 기록 ›</a>
+        </div>
+        <div id="wo-banner"></div>
+        <div class="wo-set-info" id="wo-set-info"></div>
+        <div class="wo-sum" id="wo-sum" style="display:none;"></div>
+        <div class="wo-progress" id="wo-progress-wrap" style="display:none;"><div class="wo-progress-bar" id="wo-progress-bar" style="width:0%;"></div></div>
+        <div id="wo-list"></div>
+      </div>
+      <div id="gate-wrap"></div>
+      <textarea class="log-note" id="log-note" placeholder="아킬레스 상태 · 자세 · 특이사항"></textarea>
+      <button class="save-btn" id="save-btn" onclick="saveLog()">저장하기</button>
+      <div class="msg" id="log-msg"></div>
+      <div id="sync-status"></div>
+      <button class="reset-btn" onclick="resetToday()">↺ 오늘 초기화</button>
+    </div>
+  </div>
+
   <div class="section">
     <div class="health-card">
-      <div class="weekly-head" onclick="toggleWeekly()">
+      <div class="weekly-head static">
         <div class="weekly-head-title">📊 건강 지표 · 주간 현황</div>
-        <div class="weekly-toggle" id="wk-toggle">펼치기 ▾</div>
       </div>
-      <div class="weekly-body" id="wk-body">
+      <div class="weekly-body open" id="wk-body">
         <div class="weight-lock">
           ⚠️ 체중은 현재 <b>주 1회 측정</b> 기준입니다. 부종(ECW 0.401)·NSAIDs 영향으로 6월 체중은 참고용이며,
-          NSAIDs 종료·ECW 정상화 후 활성화 → 추후 <b>감량기부터 일 1회</b> 측정으로 전환 예정.
+          NSAIDs 종료·ECW 정상화 후 활성화 → 추후 <b>감량기부터 일 1회</b> 측정으로 전환 예정.<br><b style="color:var(--blue3);font-size:15px;display:inline-block;margin-top:6px;">📅 매주 월요일 아침 공복에 측정하세요.</b>
         </div>
         <div class="metric-row">
           <div class="metric-lbl">체중 <small>주 1회 · 동일 요일·공복 측정 권장</small></div>
@@ -314,83 +394,6 @@ canvas{display:block;width:100%;}
         <button class="wk-save-btn" onclick="saveWeekly()">주간 기록 저장</button>
         <div class="wk-msg" id="wk-msg"></div>
       </div>
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="sec-label">오늘의 식단 <span class="sec-hint" id="diet-phase-tag">—</span></div>
-    <div class="diet-summary">
-      <div class="ds-item"><div class="ds-val" id="ds-kcal">—</div><div class="ds-lbl">목표 kcal</div></div>
-      <div class="ds-item"><div class="ds-val" id="ds-protein">—</div><div class="ds-lbl">단백질 목표 (g)</div></div>
-      <div class="ds-item"><div class="ds-val" id="ds-egg">3/3</div><div class="ds-lbl">전란 (개)</div></div>
-    </div>
-    <div class="diet-item">
-      <div class="diet-time">🌅 아침 <span class="diet-kcal" id="k-breakfast">—</span></div>
-      <div class="diet-menu" id="today-breakfast">—</div>
-    </div>
-    <div class="diet-item">
-      <div class="diet-time">☀️ 점심 <span class="diet-kcal" id="k-lunch">—</span></div>
-      <div class="diet-menu" id="today-lunch">—</div>
-    </div>
-    <div class="diet-item" id="snack-item">
-      <div class="diet-time">🍪 간식 <span class="diet-kcal" id="k-snack">—</span></div>
-      <div class="diet-menu" id="today-snack">—</div>
-    </div>
-    <div class="diet-item">
-      <div class="diet-time">🌙 저녁 <span class="diet-kcal" id="k-dinner">—</span></div>
-      <div class="diet-menu" id="today-dinner">—</div>
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="sec-label"><span>오늘의 운동 <span class="sec-hint" id="wo-phase-tag">—</span></span><a class="wo-week-link" href="final_history.html#workout">🏋️ 주간 운동 ›</a></div>
-    <div class="wo-card" id="wo-card">
-      <div id="wo-banner"></div>
-      <div class="wo-set-info" id="wo-set-info"></div>
-      <div class="wo-sum" id="wo-sum" style="display:none;"></div>
-      <div class="wo-progress" id="wo-progress-wrap" style="display:none;"><div class="wo-progress-bar" id="wo-progress-bar" style="width:0%;"></div></div>
-      <div id="wo-list"></div>
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="sec-label">오늘의 기록</div>
-    <div class="log-card">
-      <div style="margin-bottom:8px;">
-        <div class="field-lbl">날짜</div>
-        <input class="inp" type="date" id="log-date" style="width:100%;font-size:13px;">
-      </div>
-      <div class="log-row1">
-        <div><div class="field-lbl">걸음수</div><input class="inp" type="number" step="100" id="log-steps" placeholder="7000"></div>
-        <div><div class="field-lbl">수면시간 (h)</div><input class="inp" type="number" step="0.5" id="log-sleep" placeholder="7.5"></div>
-        <div><div class="field-lbl">식단 준수</div><button class="diet-check-btn" id="diet-btn" onclick="toggleDiet()">—</button></div>
-      </div>
-      <div class="pain-wrap">
-        <div class="tracker-head" style="margin-bottom:6px;"><div class="tracker-lbl">🩹 통증 (0~10, 매일)</div></div>
-        <div class="pain-row">
-          <div class="pain-lbl">아킬레스</div>
-          <input class="pain-slider" type="range" min="0" max="10" value="0" id="pain-achilles" oninput="updatePain()">
-          <div class="pain-val lo" id="pain-achilles-v">0</div>
-        </div>
-      </div>
-      <div class="tracker-wrap">
-        <div class="tracker-head"><div class="tracker-lbl">💧 수분 (875ml × 4)</div><div class="tracker-val" id="water-count">0 / 4</div></div>
-        <div class="tracker-btns" style="grid-template-columns:repeat(4,1fr);" id="water-btns"></div>
-      </div>
-      <div class="tracker-wrap">
-        <div class="tracker-head"><div class="tracker-lbl">💊 영양제</div><div class="tracker-val" id="supp-count">0 / 3</div></div>
-        <div class="tracker-btns" style="grid-template-columns:repeat(3,1fr);" id="supp-btns"></div>
-      </div>
-      <div class="tracker-wrap">
-        <div class="tracker-head"><div class="tracker-lbl">🚶 산책</div></div>
-        <div class="act-row" id="act-row"></div>
-      </div>
-      <div id="gate-wrap"></div>
-      <textarea class="log-note" id="log-note" placeholder="아킬레스 상태 · 자세 · 특이사항"></textarea>
-      <button class="save-btn" id="save-btn" onclick="saveLog()">저장하기</button>
-      <div class="msg" id="log-msg"></div>
-      <div id="sync-status"></div>
-      <button class="reset-btn" onclick="resetToday()">↺ 오늘 초기화</button>
     </div>
   </div>
 
@@ -436,12 +439,12 @@ var EXERCISES = [
 
 function lsGet(k){try{return JSON.parse(localStorage.getItem(k)||'null');}catch(e){return null;}}
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
-function dateKey(d){d=d||new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();}
+function rawDateKey(d){d=d||new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();}
+// 인자 없으면 '현재 선택된 날짜' 기준 → 모든 항목(운동·식단·수분·영양제 등) 단일 키로 동기화
+function dateKey(d){if(d)return rawDateKey(d);return curKey();}
 function padDate(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
-// "2026-06-23"(input) → "2026-6-23"(dateKey 포맷)으로 통일
-function keyFromInput(v){if(!v)return dateKey();var p=String(v).split('-');return (+p[0])+'-'+(+p[1])+'-'+(+p[2]);}
-// 현재 선택된 날짜 input 값을 dateKey 포맷으로
-function curKey(){var de=document.getElementById('log-date');return de&&de.value?keyFromInput(de.value):dateKey();}
+function keyFromInput(v){if(!v)return rawDateKey();var p=String(v).split('-');return (+p[0])+'-'+(+p[1])+'-'+(+p[2]);}
+function curKey(){var de=(typeof document!=='undefined')?document.getElementById('log-date'):null;return de&&de.value?keyFromInput(de.value):rawDateKey();}
 function sameDay(a,b){return a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate();}
 function midnight(d){var x=new Date(d);x.setHours(0,0,0,0);return x;}
 function inRange(d,a,b){var x=midnight(d);return x>=midnight(a)&&x<=midnight(b);}
@@ -507,27 +510,65 @@ function showDayDetail(d){
     +'<div class="dd-row" style="font-size:10px;">저녁: '+meals.dinner+'</div>';
 }
 
-function mealsFor(d){
+function mealsFor(d,milk){
   d=midnight(d);
-  if(isTrip(d))return {phase:'출장',kcal:1545,protein:135,breakfast:'바나나 1개 · 삶은계란 2개 · 그릭요거트 200g · 구운아몬드 20g (~500)',lunch:'찐감자 350g(휴대) · 실온닭가슴살 200g · 야채믹스 500g (~660)',snack:'',dinner:'헤이씨리초코 40g · 약콩두유 190ml · 커클랜드프로틴바 1개 (~385)'};
-  if(d<midnight(RECOVERY_START))return {phase:'전환기',kcal:1650,protein:130,breakfast:'그릭요거트 200g · 전란 2개 · 바나나 1개 (견과 제외)',lunch:'찐감자 250g · 소스닭가슴살(재고) · 야채 · 올리브유 5cc (두부 제외)',snack:'',dinner:'오트밀 75g · 전란 1개 · 닭가슴살 스테이크(재고) · 스테비아 방울토마토 10개 · 올리브유 5cc'};
-  if(d>=midnight(TRAIN_START))return {phase:'운동기',kcal:1905,protein:160,breakfast:'그릭요거트 200g · 전란 2개 · 바나나 1개 · 견과 20g (~500)',lunch:'찐감자 350g(또는 현미밥 150g) · 닭 원물 200g · 두부 150g · [양배추200·당근50·새송이100] · 올리브유 5cc · 저당소스 20g (~770)',snack:'더단백 드링크 250ml (운동 직후)',dinner:'오트밀 70g · 전란 1개 · 두부 150g · [양배추200·당근50·새송이100] · 올리브유 5cc (~525)'};
-  return {phase:'회복기',kcal:1835,protein:140,breakfast:'그릭요거트 200g · 전란 2개 · 바나나 1개 · 견과 20g (~500)',lunch:'찐감자 350g(또는 현미밥 150g) · 닭 원물 200g · 두부 150g · [양배추200·당근50·새송이100] · 올리브유 5cc · 저당소스 20g (~770)',snack:'스테비아 방울토마토 10개 (~55)',dinner:'오트밀 60g · 전란 1개 · 두부 150g · [양배추200·당근50·새송이100] · 올리브유 5cc (~510)'};
+  // milk: 저녁 오트밀에 우유 사용 여부 (출장기는 항상 false)
+  if(isTrip(d))return {phase:'출장',kcal:1545,protein:135,milkUsable:false,milk:false,breakfast:'바나나 1개 · 삶은계란 2개 · 그릭요거트 200g · 구운아몬드 20g (~500)',lunch:'찐감자 350g(휴대) · 실온닭가슴살 200g · 야채믹스 500g (~660)',snack:'',dinner:'헤이씨리초코 40g · 약콩두유 190ml · 커클랜드프로틴바 1개 (~385)'};
+  if(d<midnight(RECOVERY_START)){
+    // 전환기: 우유 사용 시 오트밀 75→50g (+우유 190ml), 칼로리 1650→1590
+    var t_din = milk
+      ? '오트밀 50g · <b>우유 190ml</b> · 전란 1개 · 닭가슴살 스테이크(재고) · 스테비아 방울토마토 10개 · 올리브유 5cc'
+      : '오트밀 75g · 전란 1개 · 닭가슴살 스테이크(재고) · 스테비아 방울토마토 10개 · 올리브유 5cc';
+    return {phase:'전환기',kcal:milk?1590:1650,protein:130,milkUsable:true,milk:!!milk,breakfast:'그릭요거트 200g · 전란 2개 · 바나나 1개 (견과 제외)',lunch:'찐감자 250g · 소스닭가슴살(재고) · 야채 · 올리브유 5cc (두부 제외)',snack:'',dinner:t_din};
+  }
+  if(d>=midnight(TRAIN_START))return {phase:'운동기',kcal:1905,protein:160,milkUsable:false,milk:false,breakfast:'그릭요거트 200g · 전란 2개 · 바나나 1개 · 견과 20g (~500)',lunch:'찐감자 350g(또는 현미밥 150g) · 닭 원물 200g · 두부 150g · [양배추200·당근50·새송이100] · 올리브유 5cc · 저당소스 20g (~770)',snack:'더단백 드링크 250ml (운동 직후)',dinner:'오트밀 70g · 전란 1개 · 두부 150g · [양배추200·당근50·새송이100] · 올리브유 5cc (~525)'};
+  // 회복기: 우유 사용 시 오트밀 60→40g (+우유 190ml), 칼로리 1835→1860
+  var r_din = milk
+    ? '오트밀 40g · <b>우유 190ml</b> · 전란 1개 · 두부 150g · [양배추200·당근50·새송이100] · 올리브유 5cc (~535)'
+    : '오트밀 60g · 전란 1개 · 두부 150g · [양배추200·당근50·새송이100] · 올리브유 5cc (~510)';
+  return {phase:'회복기',kcal:milk?1860:1835,protein:140,milkUsable:true,milk:!!milk,breakfast:'그릭요거트 200g · 전란 2개 · 바나나 1개 · 견과 20g (~500)',lunch:'찐감자 350g(또는 현미밥 150g) · 닭 원물 200g · 두부 150g · [양배추200·당근50·새송이100] · 올리브유 5cc · 저당소스 20g (~770)',snack:'스테비아 방울토마토 10개 (~55)',dinner:r_din};
 }
+// ── 우유 사용 상태 (일별) ───────────────────────────────
+// 기본값: 전환기·회복기 저녁은 우유 사용(true). 출장기는 불가. 사용자가 토글 가능.
+function curDate(){var k=curKey().split('-');return new Date(+k[0],+k[1]-1,+k[2]);}
+// 우유 = 월·화·목·토 + 사용 가능 구간(전환기·회복기, 출장기 제외)에서만 자동 적용
+function milkUsed(d){
+  d=d||curDate();
+  var m=mealsFor(d);
+  if(!m.milkUsable)return false;
+  var dow=midnight(d).getDay();          // 0일 1월 2화 3수 4목 5금 6토
+  return dow===1||dow===2||dow===4||dow===6;
+}
+
 function renderMeals(){
-  var m=mealsFor(new Date());
+  var d=curDate();
+  var milk=milkUsed(d);
+  var m=mealsFor(d,milk);
   document.getElementById('diet-phase-tag').textContent=m.phase+' · '+m.kcal+'kcal';
   document.getElementById('ds-kcal').textContent=m.kcal;
   document.getElementById('ds-protein').textContent=m.protein;
   document.getElementById('today-breakfast').textContent=m.breakfast;
   document.getElementById('today-lunch').textContent=m.lunch;
-  document.getElementById('today-dinner').textContent=m.dinner;
+  document.getElementById('today-dinner').innerHTML=m.dinner;
   var si=document.getElementById('snack-item');
   if(m.snack){document.getElementById('today-snack').textContent=m.snack;si.style.display='block';}else si.style.display='none';
   document.getElementById('k-breakfast').textContent='~500';
   document.getElementById('k-lunch').textContent=(m.phase==='전환기'||m.phase==='출장')?'~660':'~770';
   document.getElementById('k-snack').textContent=m.snack?(m.phase==='운동기'?'~120':'~55'):'';
-  document.getElementById('k-dinner').textContent=m.phase==='운동기'?'~525':(m.phase==='출장'?'~385':'~510');
+  document.getElementById('k-dinner').textContent=m.phase==='운동기'?'~525':(m.phase==='출장'?'~385':(milk?'~535':'~510'));
+
+  // 우유오트밀 안내(월·화·목·토 자동) + 조리 안전
+  var ctl=document.getElementById('milk-control');
+  if(ctl){
+    if(milk){
+      ctl.innerHTML='<div class="milk-note on">🥛 우유오트밀 (월·화·목·토 자동 적용)</div>'
+        +'<div class="milk-safety">⚠️ 조리: 계란 풀어서 · 노른자 터트리기 · 큰 그릇 · 2~3분 가열 중 한 번 젓기</div>';
+    }else if(m.milkUsable){
+      ctl.innerHTML='<div class="milk-note">💧 물 오트밀 (수·금·일)</div>';
+    }else{
+      ctl.innerHTML='<div class="milk-note">🥛 출장기 — 우유 미사용(약콩두유 유지)</div>';
+    }
+  }
 }
 
 // ── 오늘의 운동 (직접 입력 방식) ───────────────────────────
@@ -710,7 +751,7 @@ function renderSupp(){var s=lsGet('supp_'+dateKey())||{},el=document.getElementB
 var ACT_ITEMS=[{id:'walk-am',label:'아침 산책'},{id:'walk-noon',label:'점심 산책'},{id:'walk-pm',label:'저녁 산책'}];
 function renderActBtns(){var el=document.getElementById('act-row');if(!el)return;var s=lsGet('act_'+dateKey())||{};el.innerHTML='';ACT_ITEMS.forEach(function(a){var b=document.createElement('button');var on=!!s[a.id];b.className='act-btn'+(on?' on':'');b.innerHTML=(on?'✅':'○')+'<span>'+a.label+'</span>';b.onclick=function(){var st=lsGet('act_'+dateKey())||{};st[a.id]=!st[a.id];lsSet('act_'+dateKey(),st);renderActBtns();};el.appendChild(b);});}
 
-function resetToday(){['water_','supp_','act_','wo_','pain_'].forEach(function(p){try{localStorage.removeItem(p+dateKey());}catch(e){}});renderWater();renderSupp();renderActBtns();renderWorkout();loadPain();setDietVal('');['log-steps','log-sleep','log-note'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});var de=document.getElementById('log-date');if(de)de.value=padDate(new Date());}
+function resetToday(){['water_','supp_','act_','wo_','pain_'].forEach(function(p){try{localStorage.removeItem(p+dateKey());}catch(e){}});renderWater();renderSupp();renderWorkout();loadPain();setDietVal('');['log-steps','log-sleep','log-note'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});var de=document.getElementById('log-date');if(de)de.value=padDate(new Date());}
 
 function loadLog(){var de=document.getElementById('log-date');if(de&&!de.value)de.value=padDate(new Date());var log=lsGet('log_'+dateKey());if(!log)return;if(log.steps)document.getElementById('log-steps').value=log.steps;if(log.sleep)document.getElementById('log-sleep').value=log.sleep;if(log.diet)setDietVal(log.diet);if(log.note)document.getElementById('log-note').value=log.note;}
 async function saveLog(){
@@ -728,7 +769,7 @@ async function saveLog(){
   document.getElementById('log-msg').textContent='✅ 저장 완료';calcWeeklyStats();
   var btn=document.getElementById('save-btn');if(btn){btn.disabled=true;btn.textContent='저장 중...';}
   var sy=document.getElementById('sync-status');if(sy)sy.innerHTML='<div class="sbadge loading">⏳ Sheets 저장 중...</div>';
-  try{var r=await fetch(GAS,{method:'POST',body:JSON.stringify({date:ds,steps:log.steps,sleep:log.sleep,water:waterCnt+'/4',supp:suppCnt+'/3',diet:diet==='yes'?'✅':diet==='no'?'❌':'—',walk_am:actState['walk-am']?'✅':'',walk_noon:actState['walk-noon']?'✅':'',walk_pm:actState['walk-pm']?'✅':'',core:wo.core&&wo.core.done?'✅':'',pain_achilles:pain.achilles||0,workouts:woSummary,phase:phase,note:log.note})});var d=await r.json();if(d.ok){if(sy)sy.innerHTML='<div class="sbadge ok">✅ Sheets 저장 완료</div>';}else throw 0;}catch(e){if(sy)sy.innerHTML='<div class="sbadge err">⚠️ Sheets 실패 (로컬엔 저장됨)</div>';}
+  try{var r=await fetch(GAS,{method:'POST',body:JSON.stringify({date:ds,steps:log.steps,sleep:log.sleep,water:waterCnt+'/4',supp:suppCnt+'/3',diet:diet==='yes'?'✅':diet==='no'?'❌':'—',core:wo.core&&wo.core.done?'✅':'',pain_achilles:pain.achilles||0,workouts:woSummary,milk:milkUsed(curDate())?'✅':'',phase:phase,note:log.note})});var d=await r.json();if(d.ok){if(sy)sy.innerHTML='<div class="sbadge ok">✅ Sheets 저장 완료</div>';}else throw 0;}catch(e){if(sy)sy.innerHTML='<div class="sbadge err">⚠️ Sheets 실패 (로컬엔 저장됨)</div>';}
   if(btn){btn.disabled=false;btn.textContent='저장하기';}
   setTimeout(function(){document.getElementById('log-msg').textContent='';},2500);
 }
@@ -742,7 +783,10 @@ async function saveWeekly(){var weight=document.getElementById('wk-weight').valu
 async function loadFromSheets(){try{var res=await fetch(GAS),rows=await res.json();sheetsData=rows.filter(function(r){return r['날짜']&&String(r['날짜']).startsWith('주간')&&parseFloat(r['체중']);}).map(function(r){var raw=String(r['날짜']).replace('주간_','').slice(0,10),p=raw.split('-');return{dateObj:new Date(+p[0],+p[1]-1,+p[2]),weight:parseFloat(r['체중'])};}).sort(function(a,b){return a.dateObj-b.dateObj;});renderTrend();}catch(e){renderTrend();}}
 function renderTrend(){var c=document.getElementById('trend-chart');if(!c)return;var W=c.offsetWidth||c.parentElement.offsetWidth||320;if(W<10){setTimeout(renderTrend,150);return;}var pts=sheetsData.map(function(r){return{dt:(r.dateObj.getMonth()+1)+'/'+r.dateObj.getDate(),w:r.weight,obj:r.dateObj};});var wk=lsGet(weekKey());if(wk&&wk.weight){var mon=getMonday(),dt=(mon.getMonth()+1)+'/'+mon.getDate();if(!pts.some(function(p){return p.dt===dt;}))pts.push({dt:dt,w:parseFloat(wk.weight),obj:mon});}pts.sort(function(a,b){return a.obj-b.obj;});var H=65,dpr=window.devicePixelRatio||1;c.width=W*dpr;c.height=H*dpr;c.style.height=H+'px';var ctx=c.getContext('2d');ctx.scale(dpr,dpr);if(pts.length<2){document.getElementById('trend-meta').textContent='주간 체중이 2회 이상 쌓이면 표시돼요';return;}var ws=pts.map(function(p){return p.w;}),mn=Math.min.apply(null,ws),mx=Math.max.apply(null,ws);var pad=Math.max(0.5,(mx-mn)*0.2),yMn=mn-pad,yMx=mx+pad,n=pts.length;var px=function(i){return(i/(n-1))*(W-20)+10;},py=function(w){return H-7-((w-yMn)/(yMx-yMn))*(H-14);};[0.33,0.66].forEach(function(r){ctx.strokeStyle='rgba(58,53,38,0.05)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(10,7+r*(H-14));ctx.lineTo(W-10,7+r*(H-14));ctx.stroke();});ctx.beginPath();ctx.strokeStyle='#D97706';ctx.lineWidth=2;ctx.lineJoin='round';pts.forEach(function(p,i){if(i===0)ctx.moveTo(px(i),py(p.w));else ctx.lineTo(px(i),py(p.w));});ctx.stroke();pts.forEach(function(p,i){ctx.beginPath();ctx.arc(px(i),py(p.w),2.8,0,Math.PI*2);ctx.fillStyle='#D97706';ctx.fill();});var last=pts[n-1],first=pts[0];ctx.fillStyle='#D97706';ctx.font='bold 10px sans-serif';ctx.textAlign='right';ctx.fillText(last.w.toFixed(1)+'kg',W-6,py(last.w)-5);var diff=(last.w-first.w).toFixed(1);document.getElementById('trend-meta').textContent=first.dt+' ~ '+last.dt+' · 변화 '+(diff>0?'+':'')+diff+'kg';}
 
-initHeader();renderPhaseTracker();renderCalendar();renderMeals();renderWorkout();renderWater();renderSupp();renderActBtns();loadPain();renderGate();loadLog();
+(function(){var de=document.getElementById('log-date');if(de&&!de.value)de.value=padDate(new Date());})();
+initHeader();renderPhaseTracker();renderCalendar();renderMeals();renderWorkout();renderWater();renderSupp();loadPain();renderGate();loadLog();
+loadWeeklyInputs();calcWeeklyStats();setTimeout(renderTrend,80);
+(function(){var de=document.getElementById('log-date');if(de)de.addEventListener('change',function(){renderMeals();renderWorkout();renderWater();renderSupp();loadPain();loadLog();});})();
 if(document.readyState==='complete')loadFromSheets();else window.addEventListener('load',loadFromSheets);
 </script>
 </body>
