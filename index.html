@@ -191,6 +191,23 @@ canvas{display:block;width:100%;}
 .ex-done-btn{padding:9px 16px;border-radius:8px;border:1.5px solid var(--grey2);background:transparent;color:var(--grey2);cursor:pointer;font-size:12px;font-weight:700;font-family:inherit;white-space:nowrap;}
 .ex-done-btn.on{border-color:var(--green);background:rgba(52,211,153,0.1);color:var(--green);}
 .ex-lockmsg{font-size:11px;color:var(--amber);margin-top:4px;line-height:1.6;}
+.target-badge{font-size:12px;font-weight:700;color:var(--blue3);background:var(--blue-dim);border:1px solid var(--border2);border-radius:8px;padding:7px 11px;margin-bottom:10px;}
+.target-badge b{font-weight:800;}
+.target-note{font-size:10px;color:var(--amber);margin:-6px 0 10px;line-height:1.5;}
+.var-btn.sug{box-shadow:0 0 0 1px var(--blue) inset;}
+.posture-row{display:flex;align-items:center;gap:7px;margin:2px 0 10px;flex-wrap:wrap;}
+.posture-lbl{font-size:11px;color:var(--grey);font-weight:600;}
+.posture-btn{font-size:11px;font-weight:700;padding:5px 10px;border-radius:7px;border:1.5px solid var(--grey2);background:transparent;color:var(--grey);cursor:pointer;font-family:inherit;}
+.posture-btn.on-good{border-color:var(--green);background:rgba(52,211,153,0.12);color:var(--green);}
+.posture-btn.on-bad{border-color:var(--red);background:rgba(220,38,38,0.08);color:var(--red);}
+.posture-warn{font-size:10px;color:var(--red);background:rgba(220,38,38,0.06);border-radius:7px;padding:7px 9px;margin:-4px 0 10px;line-height:1.6;}
+.run-card{}
+.run-inputs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;}
+.run-fld label{font-size:9px;color:var(--grey);font-weight:600;display:block;margin-bottom:3px;}
+.run-inp{width:100%;padding:8px 9px;border:1.5px solid var(--border);border-radius:7px;font-size:13px;font-weight:700;background:rgba(58,53,38,0.05);color:var(--white);outline:none;font-family:inherit;text-align:center;}
+.run-inp:focus{border-color:var(--blue);}
+.run-memo{width:100%;padding:8px 9px;border:1.5px solid var(--border);border-radius:7px;font-size:12px;background:rgba(58,53,38,0.05);color:var(--white);outline:none;font-family:inherit;margin-bottom:10px;}
+.run-memo:focus{border-color:var(--blue);}
 .field-lbl{font-size:10px;color:var(--grey);font-weight:600;margin-bottom:4px;}
 .inp{width:100%;padding:9px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-weight:700;background:rgba(58,53,38,0.05);color:var(--white);outline:none;font-family:inherit;-moz-appearance:textfield;}
 .inp::placeholder{color:var(--grey2);font-weight:400;}
@@ -434,22 +451,69 @@ var GATE_MID    = D(2026,6,22);
 var GATE_FINAL  = D(2026,7,6);
 var TARGET_74   = D(2026,12,31);
 
-var SET_ROADMAP = [
-  {from:D(2026,6,23), to:D(2026,6,28), sets:5, stage:1},
-  {from:D(2026,6,30), to:D(2026,7,5),  sets:6, stage:2},
-  {from:D(2026,7,7),  to:D(2026,7,12), sets:7, stage:3},
-  {from:D(2026,7,14), to:D(2026,7,19), sets:8, stage:4},
-  {from:D(2026,7,21), to:D(2026,12,31),sets:10,stage:4}
+// ── Phase 1(세트 가속기)·Phase 2(반복수 사다리) 운동 프로그램 ──────
+var PHASE1_RANGES = [
+  {from:D(2026,6,23), to:D(2026,6,28), sets:5,  label:'1주'},
+  {from:D(2026,6,30), to:D(2026,7,2),  sets:6,  label:'2주 1~3일'},
+  {from:D(2026,7,3),  to:D(2026,7,4),  sets:7,  label:'2주 4~5일'},
+  {from:D(2026,7,7),  to:D(2026,7,7),  sets:8,  label:'3주 1일'},
+  {from:D(2026,7,8),  to:D(2026,7,10), sets:9,  label:'3주 2~4일'},
+  {from:D(2026,7,11), to:D(2026,7,11), sets:10, label:'3주 5일'}
 ];
+var PHASE2_START = D(2026,7,14);
+var RUN_START    = D(2026,7,7);
+var PUSHUP_VARIANTS = ['니 푸시업','기본 푸시업'];
+var PULLUP_VARIANTS = ['밴드(발,초록)','밴드(무릎)','밴드(최소저항)','맨몸 시도'];
+function phase1RangeFor(d){for(var i=0;i<PHASE1_RANGES.length;i++){var r=PHASE1_RANGES[i];if(inRange(d,r.from,r.to))return r;}return null;}
+function gatePassed(){var g=lsGet('gate76')||{};return !!(g.doc&&g.pt);}
+// 매주 화요일 +1 사다리 (start가 시작 화요일, 주차만큼 reps 증가, cap에서 정지)
+function ladderReps(d,start,base,cap){
+  d=midnight(d);start=midnight(start);
+  if(d<start)return base;
+  var weeks=Math.floor((d-start)/86400000/7);
+  return Math.min(cap,base+weeks);
+}
+// 오늘의 운동 계획 (Phase1/2 + 게이트 반영). 휴식·출장·재개 전이면 null
+function planFor(d){
+  d=midnight(d);
+  if(d<midnight(RECOVERY_START)||isRest(d)||isTrip(d))return null;
+  var phase2=d>=midnight(PHASE2_START);
+  var p1=phase1RangeFor(d);
+  var sets=phase2?10:(p1?p1.sets:null);
+  var label=phase2?'Phase 2 · 반복수 사다리':('Phase 1 · 세트 가속기'+(p1?(' · '+p1.label):''));
 
-// 운동 종목 정의 (직접 입력 방식)
-// variants: 점진적 변형 단계 / squatLockUntil: 스쿼트는 7/6 승인 후 활성
-// 복근(core)은 매일, 나머지는 6/23(운동 재개)부터
+  var pushup;
+  if(!phase2) pushup={variant:'니 푸시업',reps:10};
+  else if(d<=midnight(D(2026,9,22))) pushup={variant:'니 푸시업',reps:ladderReps(d,PHASE2_START,10,20)};
+  else if(d<=midnight(D(2026,12,1))) pushup={variant:'기본 푸시업',reps:ladderReps(d,D(2026,9,23),10,20)};
+  else pushup={variant:'기본 푸시업',reps:20,note:'🏁 11월 말 목표(기본 20개×10세트) 달성 — 유지'};
+
+  var pullup;
+  if(!phase2) pullup={variant:'밴드(발,초록)',reps:10};
+  else if(d<=midnight(D(2026,8,18))) pullup={variant:'밴드(발,초록)',reps:ladderReps(d,PHASE2_START,10,15)};
+  else if(d<=midnight(D(2026,9,22))) pullup={variant:'밴드(무릎)',reps:ladderReps(d,D(2026,8,19),10,15)};
+  else if(d<=midnight(D(2026,10,27))) pullup={variant:'밴드(최소저항)',reps:ladderReps(d,D(2026,9,23),10,15)};
+  else pullup={variant:'맨몸 시도',reps:null,note:'🎯 1회 달성이 목표 · 달성 후 3~5회로 현실 목표 재설정'};
+
+  var gp=gatePassed();
+  var squatOn=d>=midnight(D(2026,7,7))&&gp;
+  var lower;
+  if(!squatOn) lower={variant:'글루트 브릿지',reps:20};
+  else if(!phase2) lower={variant:'맨몸 스쿼트',reps:10,note:'🔓 게이트 통과 — 맨몸 스쿼트 전환(10개 리셋)'};
+  else if(d<=midnight(D(2026,9,22))) lower={variant:'맨몸 스쿼트',reps:ladderReps(d,PHASE2_START,10,20)};
+  else lower={variant:'맨몸 스쿼트',reps:20,note:'🏁 20개×10세트 정착'};
+
+  var runningActive=d>=midnight(RUN_START)&&gp;
+
+  return {phase2:phase2,label:label,sets:sets,pushup:pushup,pullup:pullup,lower:lower,runningActive:runningActive,gatePassed:gp};
+}
+
+// 운동 종목 정의 (변형·목표는 planFor()가 날짜·게이트 기반으로 자동 계산)
 var EXERCISES = [
-  {id:'core',   name:'복근',   tag:'코어',          daily:true,  lockUntil:null,        variants:[]},
-  {id:'pushup', name:'푸시업', tag:'상체',          daily:false, lockUntil:RECOVERY_START, variants:['니 푸시업','기본 푸시업','디클라인 푸시업']},
-  {id:'squat',  name:'스쿼트', tag:'하체 · 단일',    daily:false, lockUntil:TRAIN_START,    variants:[]},
-  {id:'pullup', name:'턱걸이', tag:'등 · 치닝디핑',  daily:false, lockUntil:RECOVERY_START, variants:['밴드 5단계','밴드 4단계','기본 턱걸이']}
+  {id:'core',   name:'복근',   tag:'코어',         daily:true},
+  {id:'pushup', name:'푸시업', tag:'상체',         daily:false},
+  {id:'squat',  name:'하체',   tag:'브릿지·스쿼트', daily:false},
+  {id:'pullup', name:'턱걸이', tag:'등 · 치닝디핑', daily:false}
 ];
 
 function lsGet(k){try{return JSON.parse(localStorage.getItem(k)||'null');}catch(e){return null;}}
@@ -469,7 +533,7 @@ function isTrip(d){return inRange(d,TRIP_START,TRIP_END);}
 function isRest(d){var w=midnight(d).getDay();return w===0||w===1;}
 function isWorkoutDay(d){return !isRest(d)&&midnight(d)>=midnight(RECOVERY_START)&&!isTrip(d);}
 function phaseOf(d){d=midnight(d);if(d<midnight(SCHED_START))return '준비';if(isTrip(d))return '출장';if(d<midnight(RECOVERY_START))return '전환기';if(d<midnight(TRAIN_START))return '회복기';return '운동기';}
-function setRoadmap(d){for(var i=0;i<SET_ROADMAP.length;i++){if(inRange(d,SET_ROADMAP[i].from,SET_ROADMAP[i].to))return SET_ROADMAP[i];}return null;}
+function dayInfo(d){var info={phase:phaseOf(d),trip:isTrip(d),rest:isRest(d),gate:null,sets:null,stage:0,workout:false,plan:null};if(sameDay(d,GATE_MID))info.gate='중간평가';if(sameDay(d,GATE_FINAL))info.gate='최종재평가';if(d<midnight(SCHED_START)){info.phase='준비';return info;}info.workout=isWorkoutDay(d);if(info.workout){var p=planFor(d);if(p){info.sets=p.sets;info.plan=p;}}return info;}
 
 var PHASES = [
   {label:'전환기',from:D(2026,6,16),to:D(2026,6,22),sub:'6/16~6/22',gate:false},
@@ -485,7 +549,6 @@ function renderPhaseTracker(){
 
 var calCursor = new Date(2026,5,1);
 function calMove(dir){calCursor.setMonth(calCursor.getMonth()+dir);renderCalendar();}
-function dayInfo(d){var info={phase:phaseOf(d),trip:isTrip(d),rest:isRest(d),gate:null,sets:null,stage:0,workout:false};if(sameDay(d,GATE_MID))info.gate='중간평가';if(sameDay(d,GATE_FINAL))info.gate='최종재평가';if(d<midnight(SCHED_START)){info.phase='준비';return info;}info.workout=isWorkoutDay(d);if(info.workout){var r=setRoadmap(d);if(r){info.sets=r.sets;info.stage=r.stage;}}return info;}
 function renderCalendar(){
   var y=calCursor.getFullYear(),m=calCursor.getMonth();
   document.getElementById('cal-month').textContent=y+'년 '+(m+1)+'월';
@@ -513,7 +576,10 @@ function showDayDetail(d){
   if(info.trip)woTxt='복근 + 평지산책만 (웨이트 전면 보류)';
   else if(info.rest)woTxt='복근만 (일·월 휴식)';
   else if(d<midnight(RECOVERY_START))woTxt='산책 + 복근만 (6/22 평가 전 웨이트 보류)';
-  else if(info.workout){var unlocked=EXERCISES.filter(function(e){return !(e.lockUntil&&midnight(d)<midnight(e.lockUntil)&&!e.daily);}).map(function(e){return e.name;});woTxt='복근·'+unlocked.filter(function(n){return n!=='복근';}).join('·')+(midnight(d)>=midnight(TRAIN_START)?' (+러닝 승인 시)':' · 스쿼트는 7/6 후')+' · 세트·횟수 직접 기록';}
+  else if(info.workout&&info.plan){
+    var p=info.plan;
+    woTxt='복근 · 푸시업['+p.pushup.variant+' '+p.pushup.reps+'개] · 하체['+p.lower.variant+(p.lower.reps!=null?(' '+p.lower.reps+'개'):'')+'] · 턱걸이['+p.pullup.variant+(p.pullup.reps!=null?(' '+p.pullup.reps+'개'):'')+'] · <b>'+p.sets+'세트</b>'+(p.runningActive?' · 🏃러닝 3km·9분/km':'');
+  }
   else woTxt='—';
   box.className='day-detail show';
   box.innerHTML='<div class="dd-title">'+(d.getMonth()+1)+'월 '+d.getDate()+'일 ('+DOW[d.getDay()]+') · '+info.phase+' '+badges+'</div>'
@@ -661,7 +727,8 @@ function renderMeals(){
 // 데이터: wo_<date> = { <id>:{variant:int, sets:[{reps,memo}], done:bool} }
 function woState(){return lsGet('wo_'+dateKey())||{};}
 function woSave(s){lsSet('wo_'+dateKey(),s);}
-function woEx(id){var s=woState();if(!s[id])s[id]={variant:0,sets:[],done:false};if(!s[id].sets)s[id].sets=[];return s[id];}
+function woEx(id){var s=woState();if(!s[id])s[id]={variant:null,sets:[],done:false,posture:null};if(!s[id].sets)s[id].sets=[];return s[id];}
+function runState(){var s=woState();return s.running||{done:false,km:null,pace:'',memo:''};}
 
 function renderWorkout(){
   var d=new Date(),info=dayInfo(d);
@@ -670,44 +737,31 @@ function renderWorkout(){
   var list=document.getElementById('wo-list'),progWrap=document.getElementById('wo-progress-wrap'),sumWrap=document.getElementById('wo-sum');
   list.innerHTML='';progWrap.style.display='none';sumWrap.style.display='none';setInfo.textContent='';
 
-  // 출장·휴식·평가 전 → 복근만
-  if(info.trip){banner.className='wo-banner trip';banner.innerHTML='✈️ 출장 구간 — 웨이트 전면 보류. 복근 + 평지산책만.';renderExCard(list,EXERCISES[0],false);return;}
-  if(info.rest){banner.className='wo-banner rest';banner.innerHTML='🛌 휴식일 (일·월) — 복근만 진행하세요.';renderExCard(list,EXERCISES[0],false);return;}
-  if(d<midnight(RECOVERY_START)){banner.className='wo-banner rest';banner.innerHTML='⚠️ 6/22 중간평가 전 — 산책 + 복근만. 상·하체 웨이트 전면 보류.';renderExCard(list,EXERCISES[0],false);return;}
+  if(info.trip){banner.className='wo-banner trip';banner.innerHTML='✈️ 출장 구간 — 웨이트 전면 보류. 복근 + 평지산책만.';renderExCard(list,EXERCISES[0],null);return;}
+  if(info.rest){banner.className='wo-banner rest';banner.innerHTML='🛌 휴식일 (일·월) — 복근만 진행하세요.';renderExCard(list,EXERCISES[0],null);return;}
+  if(d<midnight(RECOVERY_START)){banner.className='wo-banner rest';banner.innerHTML='⚠️ 6/22 중간평가 전 — 산책 + 복근만. 상·하체 웨이트 전면 보류.';renderExCard(list,EXERCISES[0],null);return;}
 
-  // 운동 재개 (6/23~)
+  var plan=planFor(d);
+  if(!plan){banner.className='wo-banner rest';banner.innerHTML='🛌 오늘은 휴식일입니다. 복근만 진행하세요.';renderExCard(list,EXERCISES[0],null);return;}
+
   banner.className='wo-banner active';
-  var runHint=midnight(d)>=midnight(TRAIN_START)?' · 러닝(슬로우조깅)도 7/6 승인 후 추가':' · 러닝·스쿼트는 7/6 충격파 종료·승인 후';
-  banner.innerHTML='🔥 운동일 — 종목별로 변형 단계와 세트·횟수를 직접 기록하세요. 힘든 지점은 메모로 남겨 강도 조절 근거로.'+runHint;
+  var runHint = plan.runningActive ? ' · 🏃 러닝 3km·9분/km 활성'
+    : (midnight(d)>=midnight(RUN_START) ? ' · 🏃 러닝 보류(7/6 게이트 미통과)' : ' · 🏃 러닝은 7/7~ 게이트 통과 시 시작');
+  banner.innerHTML='🔥 '+plan.label+' — 오늘 목표 <b>'+plan.sets+'세트</b>'+runHint;
 
-  EXERCISES.forEach(function(ex){
-    var locked=!!(ex.lockUntil&&midnight(d)<midnight(ex.lockUntil)&&!ex.daily);
-    renderExCard(list,ex,locked);
-  });
+  EXERCISES.forEach(function(ex){ renderExCard(list,ex,plan); });
+  renderRunningCard(list,plan);
   updateWoSummary();
 }
 
-function renderExCard(list,ex,locked){
+function renderExCard(list,ex,plan){
   var st=woEx(ex.id);
   var card=document.createElement('div');
-  card.className='ex-card'+(st.done?' done':'')+(locked?' lock':'');
+  card.className='ex-card'+(st.done?' done':'');
   card.id='exc-'+ex.id;
-
-  var stateHtml = locked
-    ? '<span class="ex-state lock"><i style="font-style:normal;">🔒</i> '+(ex.id==='squat'?'7/6 승인 후':'대기')+'</span>'
-    : (st.done?'<span class="ex-state done">✓ 완료</span>':'<span class="ex-state todo">○ 미완료</span>');
-
+  var stateHtml = st.done?'<span class="ex-state done">✓ 완료</span>':'<span class="ex-state todo">○ 미완료</span>';
   var html='<div class="ex-top"><div class="ex-name">'+ex.name+' <span class="ex-tag">'+ex.tag+'</span></div>'+stateHtml+'</div>';
 
-  if(locked){
-    var lm = ex.id==='squat'
-      ? '🔒 스쿼트는 변형 없이 그대로 진행 · 충격파 종료·의료진 승인(7/6) 후 활성화'
-      : '🔒 운동 재개일(6/23) 이후 활성화';
-    card.innerHTML=html+'<div class="ex-lockmsg">'+lm+'</div>';
-    list.appendChild(card);return;
-  }
-
-  // 복근: 세트 입력 없이 '영상 따라하기 완료' 체크만
   if(ex.daily){
     html+='<div class="ex-sublabel">영상 보고 따라하기 · 세트 기록 없음</div>'
       +'<div class="ex-actions"><button class="ex-done-btn'+(st.done?' on':'')+'" style="flex:1;" onclick="toggleExDone(\''+ex.id+'\')">'+(st.done?'✓ 영상 따라하기 완료':'영상 따라하기 완료 체크')+'</button></div>';
@@ -715,18 +769,34 @@ function renderExCard(list,ex,locked){
     list.appendChild(card);return;
   }
 
-  // 변형 단계 (있을 때만)
-  if(ex.variants&&ex.variants.length){
-    html+='<div class="ex-sublabel">변형 단계 (점진)</div><div class="var-row">';
-    ex.variants.forEach(function(v,i){
-      html+='<button class="var-btn'+(st.variant===i?' on':'')+'" onclick="setVariant(\''+ex.id+'\','+i+')">'+v+'</button>';
+  var key = (ex.id==='squat')?'lower':ex.id;
+  var target = plan[key];
+
+  html+='<div class="target-badge">🎯 오늘 목표 <b>'+target.variant+'</b>'+(target.reps!=null?(' '+target.reps+'개'):'')+(plan.sets!=null?(' × '+plan.sets+'세트'):'')+'</div>';
+  if(target.note)html+='<div class="target-note">'+target.note+'</div>';
+
+  var VARLIST = (ex.id==='pushup')?PUSHUP_VARIANTS:(ex.id==='pullup'?PULLUP_VARIANTS:null);
+  if(VARLIST){
+    if(st.variant==null){
+      var sugIdx=VARLIST.indexOf(target.variant);
+      st.variant=sugIdx>=0?sugIdx:0;
+      var s0=woState();s0[ex.id]=st;woSave(s0);
+    }
+    html+='<div class="ex-sublabel">변형 단계 (자가조절 가능 · 🎯=오늘 권장)</div><div class="var-row">';
+    VARLIST.forEach(function(v,i){
+      var sug=(v===target.variant);
+      html+='<button class="var-btn'+(st.variant===i?' on':'')+(sug?' sug':'')+'" onclick="setVariant(\''+ex.id+'\','+i+')">'+v+(sug?' 🎯':'')+'</button>';
     });
     html+='</div>';
-  } else if(ex.id==='squat'){
-    html+='<div class="ex-sublabel">변형 없이 그대로 진행</div>';
+  }else{
+    html+='<div class="ex-sublabel">오늘 종목: '+target.variant+' (게이트·일정에 따라 자동 결정)</div>';
   }
 
-  // 세트 테이블
+  html+='<div class="posture-row"><span class="posture-lbl">자세 양호?</span>'
+    +'<button class="posture-btn'+(st.posture==='good'?' on-good':'')+'" onclick="setPosture(\''+ex.id+'\',\'good\')">✅ 좋음</button>'
+    +'<button class="posture-btn'+(st.posture==='bad'?' on-bad':'')+'" onclick="setPosture(\''+ex.id+'\',\'bad\')">⚠️ 무너짐</button></div>';
+  if(st.posture==='bad')html+='<div class="posture-warn">⚠️ 마지막 세트에서 자세가 무너졌어요. 다음 단계 증량은 1주 보류를 권장합니다.</div>';
+
   html+='<table class="set-table"><thead><tr>'
     +'<th class="set-head-no">세트</th><th class="set-head-rep">횟수</th><th>메모 (몇 세트·몇 개에서 힘들었는지)</th><th class="set-head-del"></th>'
     +'</tr></thead><tbody>';
@@ -753,62 +823,97 @@ function renderExCard(list,ex,locked){
   list.appendChild(card);
 }
 
+function renderRunningCard(list,plan){
+  var st=runState();
+  var card=document.createElement('div');
+  card.className='ex-card run-card'+(st.done?' done':'')+(!plan.runningActive?' lock':'');
+  card.id='exc-running';
+  if(!plan.runningActive){
+    var msg = midnight(new Date())<midnight(RUN_START)
+      ? '🔒 러닝은 7/7부터 시작 (3km·9분/km 고정 · 7/6 충격파 최종재평가 통과 조건)'
+      : '🔒 게이트 미통과 — 의료진(담당의·물리치료사) 허가 확인 후 활성화';
+    card.innerHTML='<div class="ex-top"><div class="ex-name">🏃 러닝 <span class="ex-tag">유산소</span></div><span class="ex-state lock">🔒 대기</span></div><div class="ex-lockmsg">'+msg+'</div>';
+    list.appendChild(card);return;
+  }
+  var stateHtml=st.done?'<span class="ex-state done">✓ 완료</span>':'<span class="ex-state todo">○ 미완료</span>';
+  var html='<div class="ex-top"><div class="ex-name">🏃 러닝 <span class="ex-tag">유산소</span></div>'+stateHtml+'</div>';
+  html+='<div class="target-badge">🎯 목표 <b>3km · 9분/km</b> 고정 (재발 방지 원칙 — 페이스업 금지)</div>';
+  html+='<div class="run-inputs">'
+    +'<div class="run-fld"><label>실제 거리(km)</label><input class="run-inp" type="number" step="0.1" value="'+(st.km!=null?st.km:'')+'" placeholder="3.0" oninput="setRun(\'km\',this.value)"></div>'
+    +'<div class="run-fld"><label>실제 페이스(분/km)</label><input class="run-inp" type="text" value="'+escAttr(st.pace||'')+'" placeholder="9:00" oninput="setRun(\'pace\',this.value)"></div>'
+    +'</div>'
+    +'<input class="run-memo" type="text" value="'+escAttr(st.memo||'')+'" placeholder="컨디션·날씨 등 메모" oninput="setRun(\'memo\',this.value)">'
+    +'<div class="ex-actions"><button class="ex-done-btn'+(st.done?' on':'')+'" style="flex:1;" onclick="toggleRunDone()">'+(st.done?'✓ 완료됨':'완료 체크')+'</button></div>';
+  card.innerHTML=html;
+  list.appendChild(card);
+}
+
 function escAttr(s){return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
-// 상태 변경 — 입력값(reps/memo)은 리렌더 없이 저장(포커스 유지)
 function setReps(id,i,v){var s=woState();if(!s[id])s[id]=woEx(id);s[id].sets[i].reps=(v===''?null:parseInt(v)||0);woSave(s);updateWoSummary();}
 function setMemo(id,i,v){var s=woState();if(!s[id])s[id]=woEx(id);s[id].sets[i].memo=v;woSave(s);}
-// 구조 변경 — 리렌더
+function setRun(field,v){var s=woState();if(!s.running)s.running=runState();s.running[field]=(field==='km')?(v===''?null:parseFloat(v)):v;woSave(s);}
 function setVariant(id,i){var s=woState();if(!s[id])s[id]=woEx(id);s[id].variant=i;woSave(s);refreshExCard(id);}
+function setPosture(id,val){var s=woState();if(!s[id])s[id]=woEx(id);s[id].posture=(s[id].posture===val?null:val);woSave(s);refreshExCard(id);}
 function addSet(id){var s=woState();if(!s[id])s[id]=woEx(id);s[id].sets.push({reps:null,memo:''});woSave(s);refreshExCard(id);}
 function delSet(id,i){var s=woState();if(!s[id])s[id]=woEx(id);s[id].sets.splice(i,1);woSave(s);refreshExCard(id);}
 function toggleExDone(id){var s=woState();if(!s[id])s[id]=woEx(id);s[id].done=!s[id].done;woSave(s);refreshExCard(id);}
+function toggleRunDone(){var s=woState();if(!s.running)s.running=runState();s.running.done=!s.running.done;woSave(s);refreshRunCard();}
 
-// 단일 카드만 다시 그림(전체 리렌더 회피 — 다른 입력 포커스 보존)
 function refreshExCard(id){
   var old=document.getElementById('exc-'+id);if(!old)return;
   var ex=EXERCISES.filter(function(e){return e.id===id;})[0];if(!ex)return;
-  var d=new Date();
-  var locked=!!(ex.lockUntil&&midnight(d)<midnight(ex.lockUntil)&&!ex.daily);
+  var plan=planFor(new Date());
   var tmp=document.createElement('div');
-  renderExCard(tmp,ex,locked);
+  renderExCard(tmp,ex,plan);
   old.replaceWith(tmp.firstChild);
   updateWoSummary();
+}
+function refreshRunCard(){
+  var old=document.getElementById('exc-running');if(!old)return;
+  var plan=planFor(new Date());if(!plan)return;
+  var tmp=document.createElement('div');
+  renderRunningCard(tmp,plan);
+  old.replaceWith(tmp.firstChild);
 }
 
 function updateWoSummary(){
   var d=new Date(),info=dayInfo(d);
   var sumWrap=document.getElementById('wo-sum'),progWrap=document.getElementById('wo-progress-wrap');
-  // 복근만 하는 날은 요약 숨김
-  if(info.trip||info.rest||d<midnight(RECOVERY_START)){sumWrap.style.display='none';progWrap.style.display='none';return;}
+  if(info.trip||info.rest||d<midnight(RECOVERY_START)||!info.plan){sumWrap.style.display='none';progWrap.style.display='none';return;}
   var s=woState();
-  // 세트 운동만 집계(복근=영상 따라하기는 종목 카운트에서 제외)
-  var visibleExs=EXERCISES.filter(function(ex){return !ex.daily && !(ex.lockUntil&&midnight(d)<midnight(ex.lockUntil));});
+  var setExs=EXERCISES.filter(function(ex){return !ex.daily;});
   var doneCnt=0,totalSets=0,totalReps=0;
-  visibleExs.forEach(function(ex){
+  setExs.forEach(function(ex){
     var e=s[ex.id];if(!e)return;
     if(e.done)doneCnt++;
     if(e.sets){totalSets+=e.sets.length;e.sets.forEach(function(r){totalReps+=(parseInt(r.reps)||0);});}
   });
   sumWrap.style.display='grid';
-  sumWrap.innerHTML='<div class="wo-sum-card"><div class="wo-sum-val">'+doneCnt+' / '+visibleExs.length+'</div><div class="wo-sum-lbl">완료 종목</div></div>'
+  sumWrap.innerHTML='<div class="wo-sum-card"><div class="wo-sum-val">'+doneCnt+' / '+setExs.length+'</div><div class="wo-sum-lbl">완료 종목</div></div>'
     +'<div class="wo-sum-card"><div class="wo-sum-val">'+totalSets+'</div><div class="wo-sum-lbl">총 세트</div></div>'
     +'<div class="wo-sum-card"><div class="wo-sum-val">'+totalReps+'</div><div class="wo-sum-lbl">총 횟수</div></div>';
   progWrap.style.display='block';
-  document.getElementById('wo-progress-bar').style.width=(visibleExs.length?Math.round(doneCnt/visibleExs.length*100):0)+'%';
+  document.getElementById('wo-progress-bar').style.width=(setExs.length?Math.round(doneCnt/setExs.length*100):0)+'%';
 }
 
-// Sheets 전송용 운동 요약 문자열: "푸시업[기본 푸시업] 12/12/10 (3세트 8개부터 흔들림) | 턱걸이[밴드 5단계] 8"
 function buildWoSummary(wo){
   var parts=[];
   EXERCISES.forEach(function(ex){
     var e=wo[ex.id];if(!e||!e.sets||!e.sets.length)return;
-    var vname=(ex.variants&&ex.variants.length&&ex.variants[e.variant!=null?e.variant:0])||'';
+    var VARLIST=(ex.id==='pushup')?PUSHUP_VARIANTS:(ex.id==='pullup'?PULLUP_VARIANTS:null);
+    var vname=VARLIST?(VARLIST[e.variant!=null?e.variant:0]||''):'';
     var reps=e.sets.map(function(r){return (r.reps!=null?r.reps:'-');}).join('/');
     var memos=e.sets.map(function(r,i){return r.memo?('S'+(i+1)+':'+r.memo):'';}).filter(Boolean).join(', ');
-    var seg=ex.name+(vname?'['+vname+']':'')+' '+reps+(e.done?' ✅':'')+(memos?(' ('+memos+')'):'');
+    var postureTxt=e.posture==='bad'?' ⚠️자세무너짐':(e.posture==='good'?' ✅자세양호':'');
+    var seg=ex.name+(vname?'['+vname+']':'')+' '+reps+(e.done?' ✅':'')+postureTxt+(memos?(' ('+memos+')'):'');
     parts.push(seg);
   });
+  if(wo.running&&(wo.running.done||wo.running.km!=null)){
+    var r=wo.running;
+    var rseg='러닝'+(r.km!=null?(' '+r.km+'km'):'')+(r.pace?('·'+r.pace+'/km'):'')+(r.done?' ✅':'')+(r.memo?(' ('+r.memo+')'):'');
+    parts.push(rseg);
+  }
   return parts.join(' | ');
 }
 
