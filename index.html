@@ -118,6 +118,9 @@ canvas{display:block;width:100%;}
 .seg-note{font-size:11px;color:var(--amber);background:rgba(251,191,36,0.10);border-radius:7px;padding:7px 10px;margin-top:8px;line-height:1.6;}
 .egg-note{font-size:11px;color:var(--grey);background:var(--card2);border-radius:7px;padding:7px 10px;margin-top:8px;}
 .egg-note b{color:var(--blue3);}
+.berry-note{font-size:11px;color:var(--white);background:rgba(124,58,173,0.06);border:1px solid rgba(124,58,173,0.18);border-radius:7px;padding:8px 10px;margin-top:8px;line-height:1.6;}
+.berry-note b{color:#7C3AAD;}
+.berry-warn{font-size:10px;color:var(--red);}
 .ldl-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;}
 .ldl-card{background:var(--card2);border-radius:9px;padding:11px;text-align:center;}
 .ldl-val{font-size:20px;font-weight:800;color:var(--green);line-height:1;}
@@ -299,6 +302,7 @@ canvas{display:block;width:100%;}
     <div class="diet-item">
       <div class="diet-time">🌅 아침 <span class="diet-kcal" id="k-breakfast">—</span></div>
       <div class="diet-menu" id="today-breakfast">—</div>
+      <div id="berry-am"></div>
     </div>
     <div class="diet-item">
       <div class="diet-time">☀️ 점심 <span class="diet-kcal" id="k-lunch">—</span></div>
@@ -525,73 +529,56 @@ function showDayDetail(d){
 // ── 식단 구간 정의 (6/21~7/5 일자별 + 운동기) ──────────────
 // 각 구간: 끼니 구성 + 칼로리 + 단백질 + 우유가능 + 콜레스테롤(mg)·포화지방(g)
 // 난백 50g은 저녁 전란 대체(저녁 전란 0, 아침 전란 2 유지) → 일일 전란 2개 기준
+// 아침은 날짜로 결정(6/27~ 베리믹스). 점심은 전환기(A)와 그 외로 구분.
+var BREAKFAST_BANANA = '그릭요거트 무가당저지방 200g · 삶은계란 2개 · 바나나 1개 · 견과 20g (~500)';
+var BREAKFAST_BERRY  = '그릭요거트 무가당저지방 200g · 삶은계란 2개 · <b>트리플베리믹스 100g</b> · 견과 20g (~470)';
+var LUNCH_A = '찐감자 250g · 소스닭가슴살(재고) · [양배추200·당근50·새송이100] · 올리브유 5cc (~605)';
+var LUNCH_STD = '찐감자 350g(또는 현미밥 150g) · 닭 원물 200g · <b>두부 150g</b> · [양배추200·당근50·새송이100] · 올리브유 5cc · 저당소스 20g (~770)';
+
+// 구간 정의 — 저녁·칼로리·우유 위주(아침/점심은 동적 조립). berry:과일전환과 무관히 날짜로 결정
 var DIET_SEG = {
-  A:{phase:'전환기',kcalMilk:1550,kcalWater:1610,protein:130,milkUsable:true,
-     chol:372,sat:3.2,
-     breakfast:'그릭요거트 무가당저지방 200g · 삶은계란 2개 · 바나나 1개 (~370)',
-     lunch:'찐감자 250g · 소스닭가슴살(재고) · 야채 250g · 올리브유 5cc (~600)',
+  A:{phase:'전환기',milk:'dow',kcalMilk:1685,kcalWater:1685,protein:135,milkUsable:true,chol:372,sat:3.2,lunch:'A',
      snack:'',
-     dinM:'오트밀 50g · <b>우유 190ml</b> · <b>난백 50g</b> · 닭가슴살 스테이크(재고) · 스테비아 방울토마토 10개 · 올리브유 5cc (~580)',
-     dinW:'오트밀 75g · <b>난백 50g</b> · 닭가슴살 스테이크(재고) · 스테비아 방울토마토 10개 · 올리브유 5cc (~610)'},
-  B:{phase:'임시 회복기',kcalMilk:1610,kcalWater:1610,protein:140,milkUsable:true,temp:true,
-     chol:372,sat:3.2,note:'야채·두부 미구매(월급일 6/26 전) · 닭 100g 추가 보충',
-     breakfast:'그릭요거트 200g · 삶은계란 2개 · 바나나 1개 · 견과 20g (~500)',
-     lunch:'찐감자 350g · 닭가슴살 원물 200g · 올리브유 5cc · 저당소스 20g (~565)',
+     dinM:'오트밀 50g · <b>우유 190ml</b> · <b>난백 50g</b> · 닭가슴살 스테이크(재고) · 방울토마토 10개 · 올리브유 5cc (~580)',
+     dinW:'오트밀 75g · <b>난백 50g</b> · 닭가슴살 스테이크(재고) · 방울토마토 10개 · 올리브유 5cc (~610)'},
+  B:{phase:'회복기',milk:true,kcalMilk:1860,kcalWater:1860,protein:140,milkUsable:true,chol:372,sat:3.2,lunch:'STD',
      snack:'스테비아 방울토마토 10개 (~55)',
-     dinM:'오트밀 40g · <b>우유 190ml</b> · <b>난백 50g</b> · 닭가슴살 원물 100g · 방울토마토 10개 · 올리브유 5cc (~490)',
-     dinW:'오트밀 40g · <b>우유 190ml</b> · <b>난백 50g</b> · 닭가슴살 원물 100g · 방울토마토 10개 · 올리브유 5cc (~490)'},
-  C:{phase:'임시 회복기',kcalMilk:1580,kcalWater:1580,protein:140,milkUsable:false,temp:true,
-     chol:372,sat:3.2,note:'야채·두부 미구매(월급일 6/26 전) · 물 오트밀',
-     breakfast:'그릭요거트 200g · 삶은계란 2개 · 바나나 1개 · 견과 20g (~500)',
-     lunch:'찐감자 350g · 닭가슴살 원물 200g · 올리브유 5cc · 저당소스 20g (~565)',
+     dinM:'오트밀 40g · <b>우유 190ml</b> · <b>난백 50g</b> · <b>두부 150g</b> · 야채 350g · 올리브유 5cc (~535)',
+     dinW:'오트밀 40g · <b>우유 190ml</b> · <b>난백 50g</b> · <b>두부 150g</b> · 야채 350g · 올리브유 5cc (~535)'},
+  C:{phase:'회복기',milk:false,kcalMilk:1835,kcalWater:1835,protein:140,milkUsable:false,chol:372,sat:3.2,lunch:'STD',
      snack:'스테비아 방울토마토 10개 (~55)',
-     dinM:'오트밀 60g · <b>난백 50g</b> · 닭가슴살 원물 100g · 방울토마토 10개 · 올리브유 5cc (~460)',
-     dinW:'오트밀 60g · <b>난백 50g</b> · 닭가슴살 원물 100g · 방울토마토 10개 · 올리브유 5cc (~460)'},
-  D:{phase:'회복기',kcalMilk:1860,kcalWater:1860,protein:140,milkUsable:true,
-     chol:372,sat:3.2,
-     breakfast:'그릭요거트 200g · 삶은계란 2개 · 바나나 1개 · 견과 20g (~500)',
-     lunch:'찐감자 350g(또는 현미밥 150g) · 닭 원물 200g · 두부 150g · [양배추200·당근50·새송이100] · 올리브유 5cc · 저당소스 20g (~770)',
+     dinM:'오트밀 60g · <b>난백 50g</b> · <b>두부 150g</b> · 야채 350g · 올리브유 5cc (~510)',
+     dinW:'오트밀 60g · <b>난백 50g</b> · <b>두부 150g</b> · 야채 350g · 올리브유 5cc (~510)'},
+  D:{phase:'회복기',milk:true,kcalMilk:1830,kcalWater:1830,protein:140,milkUsable:true,chol:372,sat:3.2,lunch:'STD',
      snack:'스테비아 방울토마토 10개 (~55)',
-     dinM:'오트밀 40g · <b>우유 190ml</b> · <b>난백 50g</b> · 두부 150g · [양배추200·당근50·새송이100] · 올리브유 5cc (~535)',
-     dinW:'오트밀 40g · <b>우유 190ml</b> · <b>난백 50g</b> · 두부 150g · [양배추200·당근50·새송이100] · 올리브유 5cc (~535)'},
-  E:{phase:'회복기',kcalMilk:1835,kcalWater:1835,protein:140,milkUsable:false,
-     chol:372,sat:3.2,
-     breakfast:'그릭요거트 200g · 삶은계란 2개 · 바나나 1개 · 견과 20g (~500)',
-     lunch:'찐감자 350g(또는 현미밥 150g) · 닭 원물 200g · 두부 150g · [양배추200·당근50·새송이100] · 올리브유 5cc · 저당소스 20g (~770)',
+     dinM:'오트밀 40g · <b>우유 190ml</b> · <b>난백 50g</b> · <b>두부 150g</b> · 야채 350g · 올리브유 5cc (~535)',
+     dinW:'오트밀 40g · <b>우유 190ml</b> · <b>난백 50g</b> · <b>두부 150g</b> · 야채 350g · 올리브유 5cc (~535)'},
+  E:{phase:'회복기',milk:false,kcalMilk:1805,kcalWater:1805,protein:140,milkUsable:false,chol:372,sat:3.2,lunch:'STD',
      snack:'스테비아 방울토마토 10개 (~55)',
-     dinM:'오트밀 60g · <b>난백 50g</b> · 두부 150g · [양배추200·당근50·새송이100] · 올리브유 5cc (~510)',
-     dinW:'오트밀 60g · <b>난백 50g</b> · 두부 150g · [양배추200·당근50·새송이100] · 올리브유 5cc (~510)'},
-  F:{phase:'운동기',kcalMilk:1945,kcalWater:1945,protein:160,milkUsable:true,
-     chol:372,sat:3.2,
-     breakfast:'그릭요거트 200g · 삶은계란 2개 · 바나나 1개 · 견과 20g (~500)',
-     lunch:'찐감자 350g(또는 현미밥 150g) · 닭 원물 200g · 두부 150g · [양배추200·당근50·새송이100] · 올리브유 5cc · 저당소스 20g (~770)',
+     dinM:'오트밀 60g · <b>난백 50g</b> · <b>두부 150g</b> · 야채 350g · 올리브유 5cc (~510)',
+     dinW:'오트밀 60g · <b>난백 50g</b> · <b>두부 150g</b> · 야채 350g · 올리브유 5cc (~510)'},
+  F:{phase:'운동기',milk:true,kcalMilk:1915,kcalWater:1915,protein:160,milkUsable:true,chol:372,sat:3.2,lunch:'STD',
      snack:'더단백 드링크 250ml (운동 직후) (~110)',
-     dinM:'오트밀 50g · <b>우유 190ml</b> · <b>난백 50g</b> · 두부 150g · [양배추200·당근50·새송이100] · 올리브유 5cc (~565)',
-     dinW:'오트밀 50g · <b>우유 190ml</b> · <b>난백 50g</b> · 두부 150g · [양배추200·당근50·새송이100] · 올리브유 5cc (~565)'},
-  G:{phase:'운동기',kcalMilk:1920,kcalWater:1920,protein:160,milkUsable:false,
-     chol:372,sat:3.2,
-     breakfast:'그릭요거트 200g · 삶은계란 2개 · 바나나 1개 · 견과 20g (~500)',
-     lunch:'찐감자 350g(또는 현미밥 150g) · 닭 원물 200g · 두부 150g · [양배추200·당근50·새송이100] · 올리브유 5cc · 저당소스 20g (~770)',
+     dinM:'오트밀 50g · <b>우유 190ml</b> · <b>난백 50g</b> · <b>두부 150g</b> · 야채 350g · 올리브유 5cc (~565)',
+     dinW:'오트밀 50g · <b>우유 190ml</b> · <b>난백 50g</b> · <b>두부 150g</b> · 야채 350g · 올리브유 5cc (~565)'},
+  G:{phase:'운동기',milk:false,kcalMilk:1890,kcalWater:1890,protein:160,milkUsable:false,chol:372,sat:3.2,lunch:'STD',
      snack:'더단백 드링크 250ml (운동 직후) (~110)',
-     dinM:'오트밀 70g · <b>난백 50g</b> · 두부 150g · [양배추200·당근50·새송이100] · 올리브유 5cc (~540)',
-     dinW:'오트밀 70g · <b>난백 50g</b> · 두부 150g · [양배추200·당근50·새송이100] · 올리브유 5cc (~540)'}
+     dinM:'오트밀 70g · <b>난백 50g</b> · <b>두부 150g</b> · 야채 350g · 올리브유 5cc (~540)',
+     dinW:'오트밀 70g · <b>난백 50g</b> · <b>두부 150g</b> · 야채 350g · 올리브유 5cc (~540)'}
 };
-// 일자별 구간 매핑 (key: 'M-D')
+// 일자별 구간 매핑 (최종 명세)
 var DIET_MAP = {
-  '6-21':'A','6-22':'A','6-23':'B','6-24':'C','6-25':'B','6-26':'E','6-27':'D',
-  '6-28':'E','6-29':'D','6-30':'D','7-1':'D','7-2':'E','7-3':'D','7-4':'E','7-5':'D'
+  '6-21':'A','6-22':'A','6-23':'B','6-24':'C','6-25':'B','6-26':'C','6-27':'D',
+  '6-28':'E','6-29':'D','6-30':'D','7-1':'E','7-2':'D','7-3':'E','7-4':'D','7-5':'E'
 };
-// 우유 사용 요일: 월·화·목·토 (dow 1,2,4,6)
+var BERRY_START = D(2026,6,27);   // 6/27부터 아침 과일 = 베리믹스
 function isMilkDow(d){var w=midnight(d).getDay();return w===1||w===2||w===4||w===6;}
-// 날짜 → 구간 키 결정
 function segKeyFor(d){
   d=midnight(d);
   var mk=(d.getMonth()+1)+'-'+d.getDate();
   if(DIET_MAP[mk])return DIET_MAP[mk];
-  // 매핑 밖: 6/21 이전은 A(전환기), 7/6~ 운동기는 우유요일이면 F 아니면 G
   if(d<D(2026,6,21))return 'A';
   if(d>=midnight(TRAIN_START))return isMilkDow(d)?'F':'G';
-  // 그 외(7/5 이후~운동기 전 빈틈) 회복기 처리
   return isMilkDow(d)?'D':'E';
 }
 
@@ -599,20 +586,24 @@ function mealsFor(d,milkArg){
   d=midnight(d);
   var key=segKeyFor(d);
   var s=DIET_SEG[key];
-  // 우유 여부: 구간 키가 직접 결정 (D·F·B=우유 / E·G·C=물 / A=요일별)
-  var SEG_MILK={A:'dow',B:true,C:false,D:true,E:false,F:true,G:false};
-  var rule=SEG_MILK[key];
+  // 우유 여부: 구간의 milk 속성 ('dow'=요일별 / true / false). milkArg로 강제 가능
   var milk;
   if(milkArg!=null)milk=!!milkArg;
-  else if(rule==='dow')milk=s.milkUsable&&isMilkDow(d);
-  else milk=!!rule;
+  else if(s.milk==='dow')milk=s.milkUsable&&isMilkDow(d);
+  else milk=!!s.milk;
+  // 아침 과일: 6/27부터 베리믹스, 이전은 바나나
+  var berry=midnight(d)>=midnight(BERRY_START);
+  var breakfast=berry?BREAKFAST_BERRY:BREAKFAST_BANANA;
+  // 전환기(A) 아침은 베리믹스 전환 이전이므로 바나나 고정
+  // 점심: 전환기 A는 LUNCH_A, 그 외 표준
+  var lunch=(s.lunch==='A')?LUNCH_A:LUNCH_STD;
   var dinner=milk?s.dinM:s.dinW;
   var kcal=milk?s.kcalMilk:s.kcalWater;
   return {
     seg:key, phase:s.phase, temp:!!s.temp, note:s.note||'',
     kcal:kcal, protein:s.protein, milkUsable:s.milkUsable, milk:milk,
-    chol:s.chol, sat:s.sat, eggWhite:true,
-    breakfast:s.breakfast, lunch:s.lunch, snack:s.snack, dinner:dinner
+    chol:s.chol, sat:s.sat, eggWhite:true, berry:berry,
+    breakfast:breakfast, lunch:lunch, snack:s.snack, dinner:dinner
   };
 }
 // ── 우유/날짜 헬퍼 ───────────────────────────────────────
@@ -626,35 +617,42 @@ function renderMeals(){
   document.getElementById('diet-phase-tag').textContent=m.phase+' · '+m.kcal+'kcal';
   document.getElementById('ds-kcal').textContent=m.kcal;
   document.getElementById('ds-protein').textContent=m.protein;
-  document.getElementById('today-breakfast').textContent=m.breakfast;
-  document.getElementById('today-lunch').textContent=m.lunch;
+  document.getElementById('today-breakfast').innerHTML=m.breakfast;
+  document.getElementById('today-lunch').innerHTML=m.lunch;
   document.getElementById('today-dinner').innerHTML=m.dinner;
   var si=document.getElementById('snack-item');
   if(m.snack){document.getElementById('today-snack').innerHTML=m.snack;si.style.display='block';}else si.style.display='none';
-  // 끼니 kcal (대략 표기)
-  document.getElementById('k-breakfast').textContent=(m.phase==='전환기')?'~370':'~500';
-  document.getElementById('k-lunch').textContent=(m.phase==='전환기')?'~600':(m.temp?'~565':'~770');
-  document.getElementById('k-snack').textContent=m.snack?(m.phase==='운동기'?'~110':'~55'):'';
-  var dk=m.dinner.match(/\(~(\d+)\)/);document.getElementById('k-dinner').textContent=dk?('~'+dk[1]):'';
+  // 끼니 kcal — 메뉴 문자열의 (~숫자)에서 자동 추출
+  var kc=function(str){var x=String(str).match(/\(~(\d+)\)/);return x?('~'+x[1]):'';};
+  document.getElementById('k-breakfast').textContent=kc(m.breakfast);
+  document.getElementById('k-lunch').textContent=kc(m.lunch);
+  document.getElementById('k-snack').textContent=m.snack?kc(m.snack):'';
+  document.getElementById('k-dinner').textContent=kc(m.dinner);
 
-  // 구간 배지 + 우유/난백 + 임시구간 사유 + LDL 지표
+  // 아침 과일 안내 → 아침 카드에 표시
+  var bam=document.getElementById('berry-am');
+  if(bam){
+    if(m.berry){
+      bam.innerHTML='<div class="berry-note">🫐 아침 과일 = <b>트리플베리믹스 100g</b> (그릭요거트 위에 부어 자연 해동)'
+        +'<br><span class="berry-warn">⚠️ 전자레인지 해동 비권장 · 한 번 해동분 재냉동 금지</span></div>';
+    }else{
+      bam.innerHTML='<div class="berry-note">🍌 아침 과일 = 바나나 1개 <span style="color:var(--grey2);">(6/27부터 베리믹스 전환)</span></div>';
+    }
+  }
+
   var ctl=document.getElementById('milk-control');
   if(ctl){
     var html='';
-    html+='<div class="seg-badge">구간 '+m.seg+' · '+m.phase+(m.temp?' <span class="temp-tag">임시</span>':'')+'</div>';
-    if(m.temp&&m.note)html+='<div class="seg-note">📌 '+m.note+'</div>';
+    html+='<div class="seg-badge">구간 '+m.seg+' · '+m.phase+'</div>';
+    // 우유
     if(milk){
       html+='<div class="milk-note on">🥛 우유오트밀 (월·화·목·토 자동)</div>'
-        +'<div class="milk-safety">⚠️ 조리: 계란 풀어서 · 노른자 터트리기 · 큰 그릇 · 2~3분 가열 중 한 번 젓기</div>';
+        +'<div class="milk-safety">⚠️ 조리: 큰 그릇에 오트밀+우유 190ml+풀어둔 난백 50g · 2~3분 가열 중 한 번 젓기 (부풀어 오름 주의)</div>';
     }else if(m.milkUsable){
       html+='<div class="milk-note">💧 물 오트밀 (수·금·일)</div>';
     }
-    html+='<div class="egg-note">🥚 저녁 전란 → <b>난백 50g</b> 대체 (LDL 관리)</div>';
-    // LDL 지표
-    html+='<div class="ldl-grid">'
-      +'<div class="ldl-card"><div class="ldl-val">'+m.chol+'<span>mg</span></div><div class="ldl-lbl">식이 콜레스테롤</div><div class="ldl-sub">전란 대체 전 558 → -33%</div></div>'
-      +'<div class="ldl-card"><div class="ldl-val">'+m.sat+'<span>g</span></div><div class="ldl-lbl">포화지방</div><div class="ldl-sub">4.8 → -33%</div></div>'
-      +'</div>';
+    // 난백
+    html+='<div class="egg-note">🥚 저녁 전란 → <b>난백 50g</b> 대체 · 전란 하루 2개 한도</div>';
     ctl.innerHTML=html;
   }
 }
@@ -857,7 +855,7 @@ async function saveLog(){
   document.getElementById('log-msg').textContent='✅ 저장 완료';calcWeeklyStats();
   var btn=document.getElementById('save-btn');if(btn){btn.disabled=true;btn.textContent='저장 중...';}
   var sy=document.getElementById('sync-status');if(sy)sy.innerHTML='<div class="sbadge loading">⏳ Sheets 저장 중...</div>';
-  try{var r=await fetch(GAS,{method:'POST',body:JSON.stringify({date:ds,steps:log.steps,sleep:log.sleep,water:waterCnt+'/4',supp:suppCnt+'/3',diet:diet==='yes'?'✅':diet==='no'?'❌':'—',core:wo.core&&wo.core.done?'✅':'',pain_achilles:pain.achilles||0,workouts:woSummary,milk:milkUsed(curDate())?'✅':'',eggwhite:'✅',seg:mealsFor(curDate()).seg,phase:phase,note:log.note})});var d=await r.json();if(d.ok){if(sy)sy.innerHTML='<div class="sbadge ok">✅ Sheets 저장 완료</div>';}else throw 0;}catch(e){if(sy)sy.innerHTML='<div class="sbadge err">⚠️ Sheets 실패 (로컬엔 저장됨)</div>';}
+  try{var r=await fetch(GAS,{method:'POST',body:JSON.stringify({date:ds,steps:log.steps,sleep:log.sleep,water:waterCnt+'/4',supp:suppCnt+'/3',diet:diet==='yes'?'✅':diet==='no'?'❌':'—',core:wo.core&&wo.core.done?'✅':'',pain_achilles:pain.achilles||0,workouts:woSummary,milk:milkUsed(curDate())?'✅':'',eggwhite:'✅',berry:mealsFor(curDate()).berry?'✅':'',seg:mealsFor(curDate()).seg,phase:phase,note:log.note})});var d=await r.json();if(d.ok){if(sy)sy.innerHTML='<div class="sbadge ok">✅ Sheets 저장 완료</div>';}else throw 0;}catch(e){if(sy)sy.innerHTML='<div class="sbadge err">⚠️ Sheets 실패 (로컬엔 저장됨)</div>';}
   if(btn){btn.disabled=false;btn.textContent='저장하기';}
   setTimeout(function(){document.getElementById('log-msg').textContent='';},2500);
 }
