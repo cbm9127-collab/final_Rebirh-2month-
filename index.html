@@ -326,14 +326,13 @@ canvas{display:block;width:100%;}
     <div class="diet-item">
       <div class="diet-time">☀️ 점심 <span class="diet-kcal" id="k-lunch">—</span></div>
       <div class="diet-menu" id="today-lunch">—</div>
+      <div id="lunch-chicken-note" style="display:none;font-size:10px;color:var(--grey);margin-top:8px;background:var(--card2);border-radius:7px;padding:7px 10px;line-height:1.7;">🧊 <b>IQF 해동:</b> 전날 밤 냉장 이동 → 냉장 해동(8~12h) · 재냉동 절대 금지<br>🗓️ 주간 로테이션: 화2·수1·목2·금1·토2 (1kg=8개 정확 소진) · <span id="chicken-week-stat">—</span></div>
     </div>
     <div class="diet-item" id="snack-item">
-  <div class="diet-time">🍪 간식 <span class="diet-kcal" id="k-snack">—</span></div>
-  <div class="diet-menu" id="today-snack">—</div>
-  <div id="snack-timeline" style="font-size:10px;color:var(--grey);margin-top:6px;line-height:1.7;display:none;">
-    🕔 오후 5시 더단백 (6/23부터 적용) → 퇴근 → 세트운동+복근 → 🍽️ 저녁 식사 (방울토마토 포함)
-  </div>
-</div>
+      <div class="diet-time">🍪 간식 <span class="diet-kcal" id="k-snack">—</span></div>
+      <div class="diet-menu" id="today-snack">—</div>
+      <div id="snack-timeline" style="font-size:10px;color:var(--grey);margin-top:6px;line-height:1.7;display:none;">🕔 오후5시 더단백 → 퇴근 → 세트운동+복근 → 🍽️ 저녁 식사</div>
+    </div>
     <div class="diet-item">
       <div class="diet-time">🌙 저녁 <span class="diet-kcal" id="k-dinner">—</span></div>
       <div class="diet-menu" id="today-dinner">—</div>
@@ -606,6 +605,7 @@ function showDayDetail(d){
     +(meals.temp&&meals.note?'<div class="dd-row" style="font-size:10px;color:var(--amber);">📌 '+meals.note+'</div>':'')
     +'<div class="dd-row" style="margin-top:3px;font-size:10px;">아침: '+meals.breakfast+'</div>'
     +'<div class="dd-row" style="font-size:10px;">점심: '+meals.lunch+'</div>'
+    +(meals.chicken?'<div class="dd-row" style="font-size:10px;color:var(--blue3);">🍗 닭 IQF '+meals.chicken.count+'개 ('+meals.chicken.grams+'g · 단백질 ~'+meals.chicken.protein+'g) — 전날 밤 냉장 해동</div>':'')
     +(meals.snack?'<div class="dd-row" style="font-size:10px;">간식: '+meals.snack+'</div>':'')
     +'<div class="dd-row" style="font-size:10px;">저녁: '+meals.dinner+'</div>';
 }
@@ -617,8 +617,24 @@ function showDayDetail(d){
 var BREAKFAST_BANANA_A = '그릭요거트 무가당저지방 200g · 삶은계란 2개 · 바나나 1개 (~370)';
 var BREAKFAST_BANANA   = '그릭요거트 무가당저지방 200g · 삶은계란 2개 · 바나나 1개 · 견과 20g (~500)';
 var BREAKFAST_BERRY  = '그릭요거트 무가당저지방 200g · 삶은계란 2개 · <b>트리플베리믹스 100g</b> · 견과 20g (~470)';
-var LUNCH_A = '찐감자 250g · 소스닭가슴살(재고) · [양배추200·당근50·새송이100] · 올리브유 5cc (~605)';
-var LUNCH_STD = '찐감자 350g(또는 현미밥 150g) · 닭 원물 200g · <b>두부 150g</b> · [양배추200·당근50·새송이100] · 올리브유 5cc · 저당소스 20g (~770)';
+var LUNCH_A   = '찐감자 250g · 소스닭가슴살(재고) · [양배추200·당근50·새송이100] · 올리브유 5cc (~605)';
+var LUNCH_STD = '찐감자 350g(또는 현미밥 150g) · 닭 IQF · <b>두부 150g</b> · [양배추200·당근50·새송이100] · 올리브유 5cc · 저당소스 20g';
+
+// 요일별 IQF 닭가슴살 로테이션 (화:2개·수:1개·목:2개·금:1개·토:2개)
+function chickenForDay(d){
+  var dow=midnight(d).getDay(); // 0일 1월 2화 3수 4목 5금 6토
+  var cnt={2:2,3:1,4:2,5:1,6:2}[dow]||2;
+  var g=cnt*125;
+  return {count:cnt, grams:g, protein:Math.round(g*0.23)};
+}
+// 요일별 점심 문자열 동적 생성
+function lunchFor(d,seg){
+  if(seg==='A')return LUNCH_A;
+  var ck=chickenForDay(d);
+  return '찐감자 350g(또는 현미밥 150g) · <b>닭 IQF '+ck.count+'개('+ck.grams+'g)</b> · <b>두부 150g</b> · [양배추200·당근50·새송이100] · 올리브유 5cc · 저당소스 20g (~'+(ck.grams===250?820:695)+')';
+}
+// 요일별 점심 칼로리
+function lunchKcal(d){return chickenForDay(d).grams===250?820:695;}
 
 // 구간 정의 — 저녁·칼로리·우유 위주(아침/점심은 동적 조립). berry:과일전환과 무관히 날짜로 결정
 var DIET_SEG = {
@@ -626,20 +642,20 @@ var DIET_SEG = {
      snack:'',
      dinM:'오트밀 50g · <b>우유 190ml</b> · <b>난백 50g</b> · 닭가슴살 스테이크(재고) · 방울토마토 10개 · 올리브유 5cc (~580)',
      dinW:'오트밀 75g · <b>난백 50g</b> · 닭가슴살 스테이크(재고) · 방울토마토 10개 · 올리브유 5cc (~610)'},
-  B:{phase:'회복기',milk:true,kcalMilk:1860,kcalWater:1860,protein:140,milkUsable:true,chol:372,sat:3.2,lunch:'STD',
-     snack:'스테비아 방울토마토 10개 (~55)',
+  B:{phase:'회복기',milk:true,kcalMilk:1915,kcalWater:1915,protein:140,milkUsable:true,chol:372,sat:3.2,lunch:'STD',
+     snack:'더단백 드링크 250ml ☕ 오후 5시 회사에서 (~110)',
      dinM:'오트밀 40g · <b>우유 190ml</b> · <b>난백 50g</b> · <b>두부 150g</b> · 야채 350g · 올리브유 5cc (~535)',
      dinW:'오트밀 40g · <b>우유 190ml</b> · <b>난백 50g</b> · <b>두부 150g</b> · 야채 350g · 올리브유 5cc (~535)'},
-  C:{phase:'회복기',milk:false,kcalMilk:1835,kcalWater:1835,protein:140,milkUsable:false,chol:372,sat:3.2,lunch:'STD',
-     snack:'스테비아 방울토마토 10개 (~55)',
+  C:{phase:'회복기',milk:false,kcalMilk:1890,kcalWater:1890,protein:140,milkUsable:false,chol:372,sat:3.2,lunch:'STD',
+     snack:'더단백 드링크 250ml ☕ 오후 5시 회사에서 (~110)',
      dinM:'오트밀 60g · <b>난백 50g</b> · <b>두부 150g</b> · 야채 350g · 올리브유 5cc (~510)',
      dinW:'오트밀 60g · <b>난백 50g</b> · <b>두부 150g</b> · 야채 350g · 올리브유 5cc (~510)'},
-  D:{phase:'회복기',milk:true,kcalMilk:1830,kcalWater:1830,protein:140,milkUsable:true,chol:372,sat:3.2,lunch:'STD',
-     snack:'스테비아 방울토마토 10개 (~55)',
+  D:{phase:'회복기',milk:true,kcalMilk:1885,kcalWater:1885,protein:140,milkUsable:true,chol:372,sat:3.2,lunch:'STD',
+     snack:'더단백 드링크 250ml ☕ 오후 5시 회사에서 (~110)',
      dinM:'오트밀 40g · <b>우유 190ml</b> · <b>난백 50g</b> · <b>두부 150g</b> · 야채 350g · 올리브유 5cc (~535)',
      dinW:'오트밀 40g · <b>우유 190ml</b> · <b>난백 50g</b> · <b>두부 150g</b> · 야채 350g · 올리브유 5cc (~535)'},
-  E:{phase:'회복기',milk:false,kcalMilk:1805,kcalWater:1805,protein:140,milkUsable:false,chol:372,sat:3.2,lunch:'STD',
-     snack:'스테비아 방울토마토 10개 (~55)',
+  E:{phase:'회복기',milk:false,kcalMilk:1860,kcalWater:1860,protein:140,milkUsable:false,chol:372,sat:3.2,lunch:'STD',
+     snack:'더단백 드링크 250ml ☕ 오후 5시 회사에서 (~110)',
      dinM:'오트밀 60g · <b>난백 50g</b> · <b>두부 150g</b> · 야채 350g · 올리브유 5cc (~510)',
      dinW:'오트밀 60g · <b>난백 50g</b> · <b>두부 150g</b> · 야채 350g · 올리브유 5cc (~510)'},
   F:{phase:'운동기',milk:true,kcalMilk:1915,kcalWater:1915,protein:160,milkUsable:true,chol:372,sat:3.2,lunch:'STD',
@@ -682,14 +698,17 @@ function mealsFor(d,milkArg){
   var breakfast=berry?BREAKFAST_BERRY:(isSegA?BREAKFAST_BANANA_A:BREAKFAST_BANANA);
   // 전환기(A) 아침은 베리믹스 전환 이전이므로 바나나 고정
   // 점심: 전환기 A는 LUNCH_A, 그 외 표준
-  var lunch=(s.lunch==='A')?LUNCH_A:LUNCH_STD;
+  var lunch=lunchFor(d,key);
   var dinner=milk?s.dinM:s.dinW;
-  var kcal=milk?s.kcalMilk:s.kcalWater;
+  // kcal: 구간 기본값에서 점심 770 차감 후 요일별 점심 kcal 재합산
+  var baseKcal=milk?s.kcalMilk:s.kcalWater;
+  var kcal=isSegA?baseKcal:(baseKcal-770+lunchKcal(d));
   return {
     seg:key, phase:s.phase, temp:!!s.temp, note:s.note||'',
     kcal:kcal, protein:s.protein, milkUsable:s.milkUsable, milk:milk,
     chol:s.chol, sat:s.sat, eggWhite:true, berry:berry,
-    breakfast:breakfast, lunch:lunch, snack:s.snack, dinner:dinner
+    breakfast:breakfast, lunch:lunch, snack:s.snack, dinner:dinner,
+    chicken:isSegA?null:chickenForDay(d)
   };
 }
 // ── 우유/날짜 헬퍼 ───────────────────────────────────────
@@ -706,10 +725,24 @@ function renderMeals(){
   document.getElementById('today-breakfast').innerHTML=m.breakfast;
   document.getElementById('today-lunch').innerHTML=m.lunch;
   document.getElementById('today-dinner').innerHTML=m.dinner;
+  // ── snack 렌더링 (lunchNote 앞에 배치 — 예외 발생해도 snack은 반드시 표시)
   var si=document.getElementById('snack-item');
   var st=document.getElementById('snack-timeline');
   if(m.snack){document.getElementById('today-snack').innerHTML=m.snack;si.style.display='block';}else si.style.display='none';
-  if(st)st.style.display=(m.snack&&(m.seg==='F'||m.seg==='G'))?'block':'none';
+  if(st)st.style.display=(m.snack&&m.seg!=='A')?'block':'none';
+  // ── 점심 닭 해동 안내 (구간 A 제외)
+  var lunchNote=document.getElementById('lunch-chicken-note');
+  if(lunchNote){
+    var showNote=m.seg!=='A'&&m.chicken;
+    lunchNote.style.display=showNote?'block':'none';
+    if(showNote){
+      // 이번 주 화요일 계산 (인라인, weekTue 의존 제거)
+      var tue2=new Date(d);var wd2=tue2.getDay();var diff2=wd2>=2?wd2-2:7+wd2-2;tue2.setDate(tue2.getDate()-diff2);
+      var used=0;
+      for(var i=0;i<5;i++){var dd=new Date(tue2);dd.setDate(tue2.getDate()+i+1);used+=chickenForDay(dd).count;}
+      var el=document.getElementById('chicken-week-stat');if(el)el.textContent='이번 주 닭 '+used+'/8개 사용 예정';
+    }
+  }
   // 끼니 kcal — 메뉴 문자열의 (~숫자)에서 자동 추출
   var kc=function(str){var x=String(str).match(/\(~(\d+)\)/);return x?('~'+x[1]):'';};
   document.getElementById('k-breakfast').textContent=kc(m.breakfast);
